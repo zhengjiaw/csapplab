@@ -10,7 +10,7 @@ ps：我的运行环境是：ubuntu:20.04，clang version 10.0.0-4ubuntu1 Target
 
 4. 另外，因为我这里是用信号来捕捉，（事实上我觉得这是最好的方法了）， **所以我只能捕捉到pid**，但是要pgid才能和一个job关联，所以父进程会进行一下group，（一个简单的类似hash的表），映射pid到pgid，方便singhandle处理。
 
-5. 最后就是一些信号量处理的细节，一定要保证addjob在deletejob之前！！所以要addjob之后才解开SIGCHLD的阻塞，还有fg_num也是如此。
+5. 最后就是一些信号处理的细节，一定要保证addjob在deletejob之前！！所以要addjob之后才解开SIGCHLD的阻塞，还有fg_num也是如此。
 
    
 
