@@ -104,7 +104,7 @@ inline static void mySystem(char *cmdline)
     size_t nProcess = pipeCmdline(cmdline, cmdlinei);
     int pipePrevInput = 0, pipeCurrent[2];  // 建立管道
     for (int i = 1; i <= nProcess; ++i) {
-        pipe(pipeCurrent);
+        if (pipe(pipeCurrent) == -1) unix_error("pipe error \n");
         int bg_t = parseline(cmdlinei[i - 1], argv);
         if ((pid = Fork()) == 0) {
             if (i != nProcess) Dup2(pipeCurrent[1], 1);
@@ -141,12 +141,7 @@ inline static void mySystem(char *cmdline)
         addjob(jobs, pgid, FG, cmdline, nProcess);
         fg_num += nProcess;
         sigprocmask(SIG_SETMASK, &origMask, NULL);
-        tcsetpgrp(0, pgid);  // Move fg to foreground
-        // 等待前台进程组中所有进程的结束
-        // 给每一个子进程维护一个状态，signalHandle处理状态
-        // 循环检测所有的进程的状态位，只要还有进程的状态是fs我们就接着pause
-        while (fg_num) pause();
-        tcsetpgrp(0, shellId);  // 还原shell
+        waitfg(pgid);
     }
 }
 

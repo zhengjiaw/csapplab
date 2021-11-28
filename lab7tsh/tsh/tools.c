@@ -5,13 +5,12 @@
 #include <unistd.h>
 
 #include "base.h"
-#define MAXLINEN 32
 //这是一个按照空格和''分割buf（c_str）的函数，每一个分割出来的string的首地址会存入到argv[]中，最后一个*argv为NULL
 // 注意：返回的首地址存放再static char中，所以第二次调用会覆盖前一次的结果！
 //return : 1表示有BG输入，0表示没有
 int parseline(const char *buf, char **argv)
 {
-    static char res[MAXLINEN][MAXPARSE];
+    static char res[MAXLINE][MAXPARSE];
     char knew = 1;
     size_t argc = 0;
     size_t marks = INT32_MAX;

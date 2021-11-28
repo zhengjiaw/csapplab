@@ -1,9 +1,8 @@
 #ifndef BASE_H
 #define BASE_H
-#define _POSIX_SOURCE
-#define _GNU_SOURCE
-#include <errno.h>
 #include <fcntl.h>
+#include <errno.h>
+
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>

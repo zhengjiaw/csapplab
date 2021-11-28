@@ -16,7 +16,19 @@ struct job_t jobs[MAXJOBS]; /* The job list */
 size_t jobmru = 0;
 volatile int fg_num = 0;  // 前台进程中的运行进程个数
 extern pid_t shellId;
-
+/*
+ * waitfg - Block until process pid is no longer the foreground process
+ */
+void waitfg(pid_t pgid)
+{
+    tcsetpgrp(0, pgid);  // Move fg to foreground
+    // 等待前台进程组中所有进程的结束
+    // 给每一个子进程维护一个状态，signalHandle处理状态
+    // 循环检测所有的进程的状态位，只要还有进程的状态是fs我们就接着pause
+    while (fg_num) pause();
+    tcsetpgrp(0, shellId);  // 还原shell
+    return;
+}
 static int restartjob(struct job_t *job, int state)
 {
     if (job == NULL) return -1;
@@ -70,9 +82,7 @@ int do_bg_fg(char **argv)
     }
     jobmru = curjob;
     curjob = (size_t)pos;
-    tcsetpgrp(0, job->pgrp);  // Move child to foreground
-    while (fg_num) pause();
-    tcsetpgrp(0, shellId);
+    waitfg(job->pgrp);
     return 0;
 }
 
