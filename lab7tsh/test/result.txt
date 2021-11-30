@@ -1,0 +1,240 @@
+./sdriver.pl  -t trace01.txt -s ../tsh/tsh -a "-p"
+#
+# trace01.txt - Properly terminate on EOF.
+#
+./sdriver.pl  -t trace02.txt -s ../tsh/tsh -a "-p"
+#
+# trace02.txt - Process builtin quit command.
+#
+./sdriver.pl  -t trace03.txt -s ../tsh/tsh -a "-p"
+#
+# trace03.txt - Run a foreground job.
+#
+tsh> quit
+./sdriver.pl  -t trace04.txt -s ../tsh/tsh -a "-p"
+#
+# trace04.txt - Run a background job.
+#
+tsh> ./myspin 1 &
+[1] 207488 ./myspin 1 &
+./sdriver.pl  -t trace05.txt -s ../tsh/tsh -a "-p"
+#
+# trace05.txt - Process jobs builtin command.
+#
+tsh> ./myspin 2 &
+[1] 207507 ./myspin 2 &
+tsh> ./myspin 3 &
+[2] 207509 ./myspin 3 &
+tsh> jobs
+[1] (207507) Running ./myspin 2 &
+[2] (207509) Running ./myspin 3 &
+
+./sdriver.pl  -t trace06.txt -s ../tsh/tsh -a "-p"
+#
+# trace06.txt - Forward SIGINT to foreground job.
+#
+tsh> ./myspin 4
+./sdriver.pl  -t trace07.txt -s ../tsh/tsh -a "-p"
+#
+# trace07.txt - Forward SIGINT only to foreground job.
+#
+tsh> ./myspin 4 &
+[1] 207577 ./myspin 4 &
+tsh> ./myspin 5
+tsh> jobs
+
+./sdriver.pl  -t trace08.txt -s ../tsh/tsh -a "-p"
+#
+# trace08.txt - Forward SIGTSTP only to foreground job.
+#
+tsh> ./myspin 4 &
+[1] 207593 ./myspin 4 &
+tsh> ./myspin 5
+tsh> jobs
+
+./sdriver.pl  -t trace09.txt -s ../tsh/tsh -a "-p"
+#
+# trace09.txt - Process bg builtin command
+#
+tsh> ./myspin 4 &
+[1] 207608 ./myspin 4 &
+tsh> ./myspin 5
+tsh> jobs
+
+tsh> bg %2
+bash: bg %2: no such job
+tsh> jobs
+
+./sdriver.pl  -t trace10.txt -s ../tsh/tsh -a "-p"
+#
+# trace10.txt - Process fg builtin command. 
+#
+tsh> ./myspin 4 &
+[1] 207627 ./myspin 4 &
+tsh> fg %1
+tsh> jobs
+
+tsh> fg %1
+bash: fg %1: no such job
+tsh> jobs
+
+./sdriver.pl  -t trace11.txt -s ../tsh/tsh -a "-p"
+#
+# trace11.txt - Forward SIGINT to every process in foreground process group
+#
+tsh> ./mysplit 4
+tsh> /bin/ps a
+    PID TTY      STAT   TIME COMMAND
+    951 tty1     Ss+    0:00 /sbin/agetty -o -p -- \u --noclear tty1 linux
+   2621 pts/0    Ss     0:00 /usr/bin/bash
+   2951 pts/0    S+     0:00 gdb ./mdriver short1-bal.rep
+   2986 pts/0    t      0:00 /home/vm/work/csapplab.back/lab8/csc369/malloclab-handout/mdriver
+ 167376 pts/3    Ss+    0:00 /usr/bin/bash
+ 181900 pts/4    Ss+    0:00 /usr/bin/bash
+ 201323 pts/1    Ss+    0:00 /usr/bin/bash
+ 201700 pts/5    Ss+    0:00 /usr/bin/bash
+ 203082 pts/6    Ss     0:00 /usr/bin/bash
+ 203271 pts/7    Ss+    0:00 /usr/bin/bash
+ 206182 pts/8    Ss+    0:00 /usr/bin/bash
+ 207476 pts/6    S+     0:00 /usr/bin/bash
+ 207634 pts/6    S+     0:00 /usr/bin/perl ./sdriver.pl -t trace11.txt -s ../tsh/tsh -a -p
+ 207635 pts/6    S+     0:00 ../tsh/tsh -p
+ 207648 pts/6    R      0:00 /bin/ps a
+./sdriver.pl  -t trace12.txt -s ../tsh/tsh -a "-p"
+#
+# trace12.txt - Forward SIGTSTP to every process in foreground process group
+#
+tsh> ./mysplit 4
+tsh> jobs
+
+tsh> /bin/ps a
+    PID TTY      STAT   TIME COMMAND
+    951 tty1     Ss+    0:00 /sbin/agetty -o -p -- \u --noclear tty1 linux
+   2621 pts/0    Ss     0:00 /usr/bin/bash
+   2951 pts/0    S+     0:00 gdb ./mdriver short1-bal.rep
+   2986 pts/0    t      0:00 /home/vm/work/csapplab.back/lab8/csc369/malloclab-handout/mdriver
+ 167376 pts/3    Ss+    0:00 /usr/bin/bash
+ 181900 pts/4    Ss+    0:00 /usr/bin/bash
+ 201323 pts/1    Ss+    0:00 /usr/bin/bash
+ 201700 pts/5    Ss+    0:00 /usr/bin/bash
+ 203082 pts/6    Ss     0:00 /usr/bin/bash
+ 203271 pts/7    Ss+    0:00 /usr/bin/bash
+ 206182 pts/8    Ss+    0:00 /usr/bin/bash
+ 207476 pts/6    S+     0:00 /usr/bin/bash
+ 207649 pts/6    S+     0:00 /usr/bin/perl ./sdriver.pl -t trace12.txt -s ../tsh/tsh -a -p
+ 207650 pts/6    S+     0:00 ../tsh/tsh -p
+ 207664 pts/6    R      0:00 /bin/ps a
+./sdriver.pl  -t trace13.txt -s ../tsh/tsh -a "-p"
+#
+# trace13.txt - Restart every stopped process in process group
+#
+tsh> ./mysplit 4
+tsh> jobs
+
+tsh> /bin/ps a
+    PID TTY      STAT   TIME COMMAND
+    951 tty1     Ss+    0:00 /sbin/agetty -o -p -- \u --noclear tty1 linux
+   2621 pts/0    Ss     0:00 /usr/bin/bash
+   2951 pts/0    S+     0:00 gdb ./mdriver short1-bal.rep
+   2986 pts/0    t      0:00 /home/vm/work/csapplab.back/lab8/csc369/malloclab-handout/mdriver
+ 167376 pts/3    Ss+    0:00 /usr/bin/bash
+ 181900 pts/4    Ss+    0:00 /usr/bin/bash
+ 201323 pts/1    Ss+    0:00 /usr/bin/bash
+ 201700 pts/5    Ss+    0:00 /usr/bin/bash
+ 203082 pts/6    Ss     0:00 /usr/bin/bash
+ 203271 pts/7    Ss+    0:00 /usr/bin/bash
+ 206182 pts/8    Ss+    0:00 /usr/bin/bash
+ 207476 pts/6    S+     0:00 /usr/bin/bash
+ 207665 pts/6    S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ../tsh/tsh -a -p
+ 207666 pts/6    S+     0:00 ../tsh/tsh -p
+ 207678 pts/6    R      0:00 /bin/ps a
+tsh> fg %1
+bash: fg %1: no such job
+tsh> /bin/ps a
+    PID TTY      STAT   TIME COMMAND
+    951 tty1     Ss+    0:00 /sbin/agetty -o -p -- \u --noclear tty1 linux
+   2621 pts/0    Ss     0:00 /usr/bin/bash
+   2951 pts/0    S+     0:00 gdb ./mdriver short1-bal.rep
+   2986 pts/0    t      0:00 /home/vm/work/csapplab.back/lab8/csc369/malloclab-handout/mdriver
+ 167376 pts/3    Ss+    0:00 /usr/bin/bash
+ 181900 pts/4    Ss+    0:00 /usr/bin/bash
+ 201323 pts/1    Ss+    0:00 /usr/bin/bash
+ 201700 pts/5    Ss+    0:00 /usr/bin/bash
+ 203082 pts/6    Ss     0:00 /usr/bin/bash
+ 203271 pts/7    Ss+    0:00 /usr/bin/bash
+ 206182 pts/8    Ss+    0:00 /usr/bin/bash
+ 207476 pts/6    S+     0:00 /usr/bin/bash
+ 207665 pts/6    S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ../tsh/tsh -a -p
+ 207666 pts/6    S+     0:00 ../tsh/tsh -p
+ 207681 pts/6    R      0:00 /bin/ps a
+./sdriver.pl  -t trace14.txt -s ../tsh/tsh -a "-p"
+#
+# trace14.txt - Simple error handling
+#
+tsh> ./bogus
+./bogus: Command not found.
+tsh> ./myspin 4 &
+[1] 207687 ./myspin 4 &
+tsh> fg
+bash: fg current: no such job
+tsh> bg
+bash: bg current: no such job
+tsh> fg a
+error input
+tsh> bg a
+error input
+tsh> fg 9999999
+error input
+tsh> bg 9999999
+error input
+tsh> fg %2
+bash: fg %2: no such job
+tsh> fg %1
+tsh> bg %2
+bash: bg %2: no such job
+tsh> bg %1
+bash: bg %1: no such job
+tsh> jobs
+
+./sdriver.pl  -t trace15.txt -s ../tsh/tsh -a "-p"
+#
+# trace15.txt - Putting it all together
+#
+tsh> ./bogus
+./bogus: Command not found.
+tsh> ./myspin 10
+tsh> ./myspin 3 &
+[1] 207725 ./myspin 3 &
+tsh> ./myspin 4 &
+[2] 207727 ./myspin 4 &
+tsh> jobs
+[1] (207725) Running ./myspin 3 &
+[2] (207727) Running ./myspin 4 &
+
+tsh> fg %1
+tsh> jobs
+[2] (207727) Running ./myspin 4 &
+
+tsh> bg %3
+bash: bg %3: no such job
+tsh> bg %1
+bash: bg %1: no such job
+tsh> jobs
+[2] (207727) Running ./myspin 4 &
+
+tsh> fg %1
+bash: fg %1: no such job
+tsh> quit
+./sdriver.pl  -t trace16.txt -s ../tsh/tsh -a "-p"
+#
+# trace16.txt - Tests whether the shell can handle SIGTSTP and SIGINT
+#     signals that come from other processes instead of the terminal.
+#
+tsh> ./mystop 2
+
+[1]+  Stopped                 ./mystop 2
+tsh> jobs
+[1] (207741) Stopped ./mystop 2
+
+tsh> ./myint 2
+

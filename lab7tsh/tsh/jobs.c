@@ -26,6 +26,7 @@ void waitfg(pid_t pgid)
     // 给每一个子进程维护一个状态，signalHandle处理状态
     // 循环检测所有的进程的状态位，只要还有进程的状态是fs我们就接着pause
     while (fg_num) pause();
+
     tcsetpgrp(0, shellId);  // 还原shell
     return;
 }
@@ -66,17 +67,17 @@ int do_bg_fg(char **argv)
         return -1;
     }
     if (pos == -1) {
-        printf("bash: %s %s: no such job\n", argv[0], "current");
+        printf("tsh: %s %s: no such job\n", argv[0], "current");
         return -1;
     }
     int res, state = (!strcmp(argv[0], "bg") ? BG : FG);
     struct job_t *job = getjobjid(jobs, pos);
     res = restartjob(job, state);
     if (res == -1) {
-        printf("bash: %s %s: no such job\n", argv[0], !argv[1] ? "current" : argv[1]);
+        printf("tsh: %s %s: no such job\n", argv[0], !argv[1] ? "current" : argv[1]);
         return -1;
     } else if (res == 0) {
-        printf("bash: %s: job %d already in %s\n", argv[0], job->jid,
+        printf("tsh: %s: job %d already in %s\n", argv[0], job->jid,
                state == BG ? "background" : "foreground");
         return -1;
     }

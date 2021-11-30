@@ -136,7 +136,7 @@ inline static void mySystem(char *cmdline)
     if (bg) {
         addjob(jobs, pgid, BG, cmdline, nProcess);
         sigprocmask(SIG_SETMASK, &origMask, NULL);
-        printf("[%d] %d\n", getjobpid(jobs, pid)->jid, pid);
+        printf("[%d] %d %s\n", getjobpid(jobs, pid)->jid, pid, cmdline);
     } else {
         addjob(jobs, pgid, FG, cmdline, nProcess);
         fg_num += nProcess;

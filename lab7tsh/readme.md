@@ -2,6 +2,8 @@
 
 这是csapp的lab7，我是按照网上找的2002版的原型代码改动的，我也参考了一些博主的代码，不过大部分网上的代码实现版本是没有考虑管道的，以及真正的**会话的概念**，有的是是让父进程和子进程在一个前台进程组中，有的是没有使用tcsetpgrp来切换前台进程组，**那么他的shell的前台进程组就一直是父进程**，即便pause或者sigsuspend了。但是给子进程（命令）的信号就会被父进程劫走。这样是实现不了真正的管道和jobs管理的，因为概念都不对，是不能很好的扩展的，当然**这个实验并没有要求管道和重定向**，不过没有管道和重定向的shell实现起来总觉得缺点意思，如果想实现管道的话，建议不要参考那些代码。所以我对任务的实现是分出了多个进程组的，一个命令就是一个进程组就是一个job，维护一个前台进程组就行了。这个在附带的pdf后面是提到了的。
 
+如果你去搜过GitHub你会发现很多myshell都很容易就死了，还有一些tsh因为他们的设计者没有明白前台进程组的概念，所以他们的tsh fork出的进程根本就不能读数据，这样的tsh虽然也可以通过lab的测试，但从本质上来说是不正确的。**因为例如一个 `/bin/bash -c read line` 这样的读入命令都执行不了，这个新进程会被直接暂停。**
+
 ps：我的运行环境是：ubuntu:20.04，clang version 10.0.0-4ubuntu1 Target: x86_64-pc-linux-gnu，
 
 ### 概念
@@ -62,7 +64,13 @@ ps：我的运行环境是：ubuntu:20.04，clang version 10.0.0-4ubuntu1 Target
 
 5. 这个shell也做了不少的error handle，不过肯定还是有没考虑到的，或者是不想写的，如果你有兴趣，可以试着完善一些
 
-最后我提供了一个test.sh在test里可以配合csapp提供的sdriver.pl一起测试，但是我不知道他这个pl是什么机制，一直找不到myspin等等，他的makefile我也用不了.... 我不知道该把这些放到哪个目录下，所以最后我是人工测试了他的trace，基本上都符合我的预期，你也可以试试智能化（bash test.sh）哈哈，如果你能解决command not found 这应该会更棒！
+最后我提供了一个test.sh在test里可以配合csapp提供的sdriver.pl一起测试，**直接（bash test.sh）**，然后test里会生成result.txt，你可以检查一下这两个文件，观察一下是否符合你的预期，最好还是不要用diff来检查了，除了pid的不同以外，还要做和他一样的错误输出以及预期输出，这挺麻烦的。并且也有些脱离主线
+
+![image-20211130234601069](https://gitee.com/wzjia/picturetwo/raw/master/img/202111302352250.png)
+
+最后你可以通过对比一下生成的result.txt和tshref.out
+
+![image-20211130234753226](https://gitee.com/wzjia/picturetwo/raw/master/img/202111302352260.png)
 
 ### 总结
 

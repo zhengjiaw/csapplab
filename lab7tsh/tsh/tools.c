@@ -74,7 +74,7 @@ size_t redirect(char **argv)
     while (argv[argc]) {
         if (!strcmp(argv[argc], "<")) {
             if (!argv[++argc]) {
-                puts("bash: syntax error near unexpected token `newline'\n");
+                puts("tsh: syntax error near unexpected token `newline'\n");
                 return 0;
             }
             int fd = open(argv[argc], O_RDONLY);
@@ -86,7 +86,7 @@ size_t redirect(char **argv)
             Dup2(fd, STDIN_FILENO);
         } else if (!strcmp(argv[argc], ">")) {
             if (!argv[++argc]) {
-                puts("bash: syntax error near unexpected token `newline'\n");
+                puts("tsh: syntax error near unexpected token `newline'\n");
                 return 0;
             }
             int fd = Open(argv[argc], O_RDWR | O_CREAT, S_IRUSR | S_IWGRP | S_IWUSR | S_IRGRP);
@@ -94,7 +94,7 @@ size_t redirect(char **argv)
             argv[argc - 1] = argv[argc] = NULL;
         } else if (!strcmp(argv[argc], ">>")) {
             if (!argv[++argc]) {
-                puts("bash: syntax error near unexpected token `newline'\n");
+                puts("tsh: syntax error near unexpected token `newline'\n");
                 return 0;
             }
             int fd = open(argv[argc], O_RDWR | O_APPEND, S_IRUSR | S_IWGRP | S_IWUSR | S_IRGRP);
