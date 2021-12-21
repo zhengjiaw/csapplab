@@ -1,0 +1,231 @@
+#####################################################################
+# CS:APP Malloc Lab
+# Malloc driver
+#
+# Copyright (c) 2002, R. Bryant and D. O'Hallaron, All rights reserved.
+# May not be used, modified, or copied without permission.
+#
+######################################################################
+
+***********
+0. Overview
+***********
+
+The malloc driver is a trace-driven program, called "mdriver", that
+checks the student's mm.c malloc package for correctness, space
+utilization, and throughput.
+
+The driver expresses overall performance as an index in the range
+[0..100].  Malloc implementations with larger performance indices have
+better space utilization and throughput than those with smaller
+performance indices.
+
+**********************************
+2. Building and Running the Driver
+**********************************
+
+To build the driver:
+
+Step 1: Configure the driver for your site by editing the config.h
+file.  This file asks you to specify the following:
+
+- the location (TRACEDIR) and identity of the default trace files
+(TRACEFILES) that are used by the driver,
+
+- the approximate throughput of libc malloc on your system
+(AVG_LIBC_THRUPUT),
+
+- the relative contributions of space utilization (UTIL_WEIGHT) and
+throughput (1 - UTIL_WEIGHT) to the performance index,
+
+- the alignment requirement (ALIGNMENT) for the student's malloc
+implementation (4 bytes or 8 bytes),
+
+- the maximum heap size (MAX_HEAP),
+
+- the specific timing mechanism (either cycle counters (USE_FCYC),
+interval timers (USE_ITIMER), or gettimeofday timers (USE_GETTID))
+that you want the driver to use.
+
+Since the trace files are pretty big, you'll probably want to put them
+in a central place where the students can all share them. If so, then
+be sure to modify TRACEDIR and TRACEFILES with the location of the
+shared directory before you build the lab for the students.
+
+
+Step 2: Copy or soft link the malloc package you want to test to
+mm.c. For example:
+
+	unix> rm -f mm.c; ln -s mm-explicit mm.c
+
+Step 3: Compile and link the malloc package into the driver:
+
+	unix> make clean
+	unix> make
+
+Step 4: Run the driver. The driver takes a few useful options:
+
+	unix> mdriver -h
+	Usage: mdriver [-hvVa] [-f <file>]
+	Options
+		-a         Don't check the team structure.
+		-f <file>  Use <file> as the single trace file.
+		-h         Print this message.
+		-l         Run libc malloc as well.
+		-v         Print per-trace performance breakdowns.
+		-V         Print additional debugging information.
+
+The "-a" flag is particularly helpful when you are testing the
+mm-naive.c solution, since it has a blank team name. Be sure to leave
+the team name blank on this one, so that students are forced to fill
+in the information when they try to run their solutions.
+
+********************************
+3. More on the performance index
+********************************
+
+The performance index (pindex) is a linear combination of space
+utilization and throughput. It is computed as
+
+	p1 = UTIL_WEIGHT * avg_mm_util;
+	if (avg_mm_throughput > AVG_LIBC_THRUPUT) {
+	    p2 = (double)(1.0 - UTIL_WEIGHT);
+	} 
+	else {
+	    p2 = ((double) (1.0 - UTIL_WEIGHT)) * 
+		(avg_mm_throughput/AVG_LIBC_THRUPUT);
+	}
+	pindex = (p1 + p2)*100.0;
+	
+- UTIL_WEIGHT and AVG_LIBC_THRUPUT are defined in config.h. Change
+them according to taste.
+
+- UTIL_WEIGHT is a value between 0 and 1 that gives the contribution
+of space utilization (UTIL_WEIGHT) and throughput (1-UTIL_WEIGHT) to
+the performance index. Through trial and error we have found that a
+UTIL_WEIGHT of around 0.6 works well; optimizing too much for speed at
+the expense of space utilization leads to rather stupid
+implmentations. A higher value of UTIL_WEIGHT tends to discourage
+this, with the result that more intelligent implementations get better
+scores.
+
+- AVG_LIBC_THRUPUT is an estimate of the througput of the libc malloc
+on your system. Its only purpose is to cap the contribution of
+throughput to the performance index. Once the students surpass the
+AVG_LIBC_THRUPUT, they get no further benefit to their score.  This
+deters students from building extremely fast, but extremely stupid
+malloc packages. We use a constant here rather than a measured value
+to make the index more stable.
+
+- avg_mm_util is the average measured space utilization of the
+student's malloc package.  The idea is to remember the high water mark
+"hwm" of the heap for an optimal allocator, i.e., where the heap has
+no gaps and no internal fragmentation.  Utilization then is the ratio
+hwm/heapsize, where heapsize is the size of the heap in bytes after
+running the student's malloc package on the trace. Note that our
+implementation of mem_sbrk() doesn't allow the students to decrement
+the brk pointer, so brk is always the high water mark of the heap.
+
+- avg_mm_throughput is the average measured throughput (ops/second) of
+the student's malloc package on all of the traces.
+
+********
+4. Files
+********
+
+Makefile	
+	Builds the driver
+README		
+	This file
+config.h	
+	Configures the malloc lab driver
+checkalign.c	
+	Determines the alignment enforced by libc malloc
+mdriver.c
+	The driver source file
+memlib.{c,h}
+	Package used by the driver that models the memory system and sbrk()
+
+#########################
+# Various timing packages
+#########################
+clock.{c,h}	
+	Routines for accessing the Pentium and Alpha cycle counters
+fcyc.{c,h}	
+	Timer functions based on cycle counters
+fsecs.{c,h}	
+	Unifying wrapper function for the different timer packages
+ftimer.{c,h}	
+	Timer functions based on interval timers and gettimeofday()
+
+####################
+# Example solutions. 
+####################
+
+For each solution, we give a brief description and (as a sanity check)
+its performance index on a gcc/Linux/Pentium III system.
+
+mm-naive.c	
+	The simplest solution.  Malloc simply sbrk's and writes
+	a size header. Free does nothing. Realloc is implemented
+	directly with malloc and free. This solution has great
+	throughput but terrible space utilization, and thus fails on
+	many traces because it exhausts memory. This is the solution
+	that is given to the students initially.
+
+	Perf index: None, because some of the traces fail when the
+	mm_malloc and mm_realloc run out of memory.
+
+mm-implicit.c	
+	Solution based on implicit free list. Simple implicit free
+	list w/boundary tag coaelescing. This is the simplest
+	"reasonable" package. It is described in detail in the CS:APP
+	book. Can be compiled to do either first fit or next fit.
+
+	Perf index (first fit) = 44 (util) + 1 (thru) = 45/100
+	Perf index (next fit) = 44 (util) + 1 (thru) = 44/100
+
+mm-explicit.c	
+	Solution based on explicit free list with boundary tag
+	coalescing and first fit placement. This is the simplest
+	sophisticated implementation. It gets near to full credit in
+	the CMU version of the course.
+
+	Perf index = 45 (util) + 40 (thru) = 85/100
+
+mm-tree.c	
+	Highly optimized solution based on red-black trees. We've
+	never seen a solution with a higher performance index
+	than this one.
+
+	Perf index = 57 (util) + 40 (thru) = 97/100
+
+mm-test.c	
+	A buggy malloc that produces overlapping blocks. Used for
+	testing the driver.
+
+mm.{c,h}
+	This is the file that is linked into the driver. In the src/
+	directory, it is always a symbolic link to one the solutions
+	described above. The makefile has rules for installing the
+	different versions. For example, "make naive" will install
+	mm-naive as the	default by creating a symbolic link from it
+	to mm.c:
+
+	unix> rm -f mm.c mm.o; ln -s mm-naive.c mm.c
+
+******************
+5. Platform issues
+******************
+
+The driver and the various solutions (mm-xxx.c) have been tested on
+Linux/Pentium and Solaris/Sparc systems, using gcc 2.95.2.
+
+A lot of old Sparc systems out there don't have cycle counters. So we
+didn't include cycle counter routines for the Sparc like we did for
+the Pentium and Alpha. If you are using Solaris machines, you can add
+your own Sparc cycle counter routines to clock.c, or you can select a
+more portable timing mechanism such as interval timers or gettimeofday
+by editing the config.h file.
+
+
