@@ -128,9 +128,8 @@ NOTES:
  *   2. Use the BDD checker to formally verify that your solutions produce 
  *      the correct answers.
  */
+#endif 
 
-#endif
-// 1
 /*
  * bitXor - x^y using only ~ and &
  *   Example: bitXor(4, 5) = 1
@@ -147,6 +146,7 @@ int bitXor(int x, int y) { return ~(~x & ~y) & ~(x & y); }
  *   Max ops: 4
  *   Rating: 1
  */
+
 // 2 ^ 31
 #define INTMIN (0x80u << 24)  // 1个op
 int tmin(void) { return INTMIN; }
@@ -164,7 +164,6 @@ int tmin(void) { return INTMIN; }
 #define toBool(x) (!!(x))
 
 int negate(int x);  // 利用一下下面的函数，这样会更好看
-//  根据运算规则，补码最大值就是 补码最小值 - 1
 int isTmax(int x)
 {
     x = ~x;  // 如果是 Tmax 那么 为 0111... 取反之后为 1000.. 即Tmin
