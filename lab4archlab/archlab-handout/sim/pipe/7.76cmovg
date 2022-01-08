@@ -1,0 +1,203 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# Describe how and why you modified the baseline code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+
+
+# 这个代码是把条件跳转换成了cmovg，不过得分仍然是一样，一丁点变化都没有
+# 但是现在复制过来就出错了，我不知道这中间发生了什么，我也没调试这个代码了，因为没有意义，
+# 但是这或许也是一种思路
+# 不过可以确定的是像我这样改成cmvog是没有效果的，如果可以实现iaddg就好了
+# You can modify this portion
+	# Loop header
+    iaddq $-6,%rdx       #length - 6 
+	jl end		# limit < 0? if so, goto end:
+Loop:	
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+    mrmovq 16(%rdi), %r9
+    mrmovq 24(%rdi), %r10
+    mrmovq 32(%rdi), %r11
+    mrmovq 40(%rdi), %r12 
+
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    rmmovq %r9, 16(%rsi)
+    rmmovq %r10, 24(%rsi)
+    rmmovq %r11, 32(%rsi)
+    rmmovq %r12, 40(%rsi)
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %rcx,%rcx	
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r8,%r8	
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r9,%r9	
+    cmovg %rbp,%rax
+    
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r10,%r10
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r11,%r11
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r12,%r12
+    cmovg %rbp,%rax
+
+	iaddq $48, %rdi		# src+=6
+	iaddq $48, %rsi		# dst+=6
+	iaddq $-6, %rdx		# len-=6 # len >= 0?
+	jge Loop			# if so, goto Loop:
+
+end:
+    iaddq $6,%rdx
+    je Done
+
+    iaddq $-4,%rdx
+    jge end4 
+    
+    iaddq $3,%rdx
+    je end1
+
+    iaddq $-1,%rdx
+    je end2
+    
+end3:
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+    mrmovq 16(%rdi), %r9
+
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    rmmovq %r9, 16(%rsi)
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %rcx,%rcx
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r8,%r8
+    cmovg %rbp,%rax
+    
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r9,%r9	
+    cmovg %rbp,%rax
+    ret
+
+end1:
+    mrmovq (%rdi), %rcx	
+    andq %rcx,%rcx # val <= 0?
+
+	rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %rcx,%rcx
+    cmovg %rbp,%rax
+    ret 
+
+
+end2:
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %rcx,%rcx
+    cmovg %rbp,%rax
+
+     rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r8,%r8
+    cmovg %rbp,%rax
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    ret 
+
+
+end4:
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+    mrmovq 16(%rdi), %r9
+    mrmovq 24(%rdi), %r10
+
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    rmmovq %r9, 16(%rsi)
+    rmmovq %r10, 24(%rsi)
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %rcx,%rcx	
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r8,%r8	
+    cmovg %rbp,%rax
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r9,%r9	
+    cmovg %rbp,%rax
+    
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %r10,%r10
+    cmovg %rbp,%rax
+
+    andq %rdx,%rdx
+    je Done
+    mrmovq 32(%rdi), %rcx	# 如果是还剩了5个元素
+
+    rrmovq %rax,%rbp
+    iaddq $1,%rbp
+    andq %rcx,%rcx	
+    cmovg %rbp,%rax
+
+    rmmovq %rcx, 32(%rsi)
+
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

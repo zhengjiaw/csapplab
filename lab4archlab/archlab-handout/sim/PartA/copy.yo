@@ -1,0 +1,51 @@
+                            | # Execution begins at address 0
+0x000:                      |     .pos 0
+0x000: 30f40002000000000000 |     irmovq stack,%rsp
+0x00a: 804800000000000000   |     call main
+0x013: 00                   |     halt
+                            | 
+0x018:                      | .align 8
+                            | # Source block
+0x018:                      | src:
+0x018: 0a00000000000000     |     .quad 0x00a
+0x020: b000000000000000     |     .quad 0x0b0
+0x028: 000c000000000000     |     .quad 0xc00
+                            | # Destination block
+0x030:                      | dest:
+0x030: 1101000000000000     |     .quad 0x111
+0x038: 2202000000000000     |     .quad 0x222
+0x040: 3303000000000000     |     .quad 0x333
+                            | 
+0x048:                      | main: 
+0x048: 30f71800000000000000 |     irmovq src,%rdi
+0x052: 30f63000000000000000 |     irmovq dest,%rsi
+0x05c: 30f10300000000000000 |     irmovq $3,%rcx
+                            | 
+0x066: 807000000000000000   |     call copy_block
+0x06f: 90                   |     ret
+                            | 
+0x070:                      | copy_block:
+0x070: a0af                 |     pushq %r10
+0x072: a03f                 |     pushq %rbx
+0x074: a02f                 |     pushq %rdx
+0x076: 30f30800000000000000 |     irmovq $8,%rbx
+0x080: 6300                 |     xorq %rax,%rax
+0x082: 30fa0100000000000000 |     irmovq $1,%r10 
+0x08c:                      | loop:
+0x08c: 61a1                 |     subq %r10,%rcx             # len --
+0x08e: 72ba00000000000000   |     jl end     # rcx < 1 才返回 ， 即 rcx <= 0
+0x097: 50270000000000000000 |     mrmovq (%rdi),%rdx         # val = *src
+0x0a1: 40260000000000000000 |     rmmovq %rdx,(%rsi)         #  *dest = val;
+0x0ab: 6320                 |     xorq %rdx,%rax             # result ^= val;
+0x0ad: 6037                 |     addq %rbx,%rdi             # src++
+0x0af: 6036                 |     addq %rbx,%rsi             # dest++
+0x0b1: 708c00000000000000   |     jmp loop
+                            | 
+0x0ba:                      | end:
+0x0ba: b02f                 |     popq %rdx
+0x0bc: b03f                 |     popq %rbx
+0x0be: b0af                 |     popq %r10
+0x0c0: 90                   |     ret
+                            |   
+0x200:                      | .pos 0x200
+0x200:                      | stack:

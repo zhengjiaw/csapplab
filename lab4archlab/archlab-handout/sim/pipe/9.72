@@ -1,0 +1,119 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# Describe how and why you modified the baseline code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header
+	xorq %rax,%rax		# count = 0;
+    xorq %rbx,%rbx       # 0
+    subq %rdx,%rbx       # -length
+    iaddq $8,%rbx       #-length + 8
+	andq %rbx,%rbx		# limit > 0?
+	jg end		# if so, goto Done:
+
+Loop:	
+# read val from src...
+    mrmovq (%rdi), %rcx	
+	andq %rcx,%rcx
+	jle notInc1
+	iaddq $1,%rax
+
+notInc1:
+    mrmovq 8(%rdi), %r8
+    andq %r8,%r8
+	jle notInc2
+	iaddq $1,%rax
+
+notInc2:
+    mrmovq 16(%rdi), %r9
+    andq %r9,%r9
+	jle notInc3
+	iaddq $1,%rax
+
+notInc3:
+    mrmovq 24(%rdi), %r10
+    andq %r10,%r10
+	jle notInc4
+	iaddq $1,%rax
+
+notInc4:
+    mrmovq 32(%rdi), %r11
+    andq %r11,%r11 # val <= 0?
+	jle notInc5
+	iaddq $1,%rax
+
+notInc5:
+    mrmovq 40(%rdi), %r12
+    andq %r12,%r12 # val <= 0?
+	jle notInc6
+	iaddq $1,%rax
+
+notInc6:
+    mrmovq 48(%rdi), %r13 
+    andq %r13,%r13 # val <= 0?
+	jle notInc7
+	iaddq $1,%rax
+
+notInc7:
+    mrmovq 56(%rdi), %r14
+    andq %r14,%r14 # val <= 0?
+	jle notInc8
+	iaddq $1,%rax
+notInc8:
+
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    rmmovq %r9, 16(%rsi)
+    rmmovq %r10, 24(%rsi)
+    rmmovq %r11, 32(%rsi)
+    rmmovq %r12, 40(%rsi)
+    rmmovq %r13, 48(%rsi)
+    rmmovq %r14, 56(%rsi)
+
+
+	iaddq $8, %rbx		# len+=8
+	iaddq $64, %rdi		# src+=8
+	iaddq $64, %rsi		# dst+=8
+	andq %rbx,%rbx		# len < 0?
+	jl Loop			# if so, goto Loop:
+
+end:
+    irmovq $8,%rbp
+    subq %rbx,%rbp
+    je Done
+endLoop:    
+    mrmovq (%rdi), %rcx	
+    rmmovq %rcx, (%rsi)
+    iaddq $8, %rdi		# src+=8
+	iaddq $8, %rsi		# dst+=8
+    andq %rcx,%rcx # val <= 0?
+	jle notInc9
+	iaddq $1,%rax
+notInc9:
+    iaddq $-1,%rbp
+    jne endLoop
+
+
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

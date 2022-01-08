@@ -1,0 +1,51 @@
+# Execution begins at address 0
+    .pos 0
+    irmovq stack,%rsp
+    call main
+    halt
+
+.align 8
+# Source block
+src:
+    .quad 0x00a
+    .quad 0x0b0
+    .quad 0xc00
+# Destination block
+dest:
+    .quad 0x111
+    .quad 0x222
+    .quad 0x333
+
+main: 
+    irmovq src,%rdi
+    irmovq dest,%rsi
+    irmovq $3,%rcx
+
+    call copy_block
+    ret
+
+copy_block:
+    pushq %r10
+    pushq %rbx
+    pushq %rdx
+    irmovq $8,%rbx
+    xorq %rax,%rax
+    irmovq $1,%r10 
+loop:
+    subq %r10,%rcx             # len --
+    jl end     # rcx < 1 才返回 ， 即 rcx <= 0
+    mrmovq (%rdi),%rdx         # val = *src
+    rmmovq %rdx,(%rsi)         #  *dest = val;
+    xorq %rdx,%rax             # result ^= val;
+    addq %rbx,%rdi             # src++
+    addq %rbx,%rsi             # dest++
+    jmp loop
+
+end:
+    popq %rdx
+    popq %rbx
+    popq %r10
+    ret
+  
+.pos 0x200
+stack:

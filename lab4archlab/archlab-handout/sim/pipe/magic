@@ -1,0 +1,200 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# Describe how and why you modified the baseline code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header
+	xorq %rax,%rax		# count = 0;
+    iaddq $-20,%rdx       #length - 6 
+	jl end		# limit < 0? if so, goto end:
+Loop:	
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+    mrmovq 16(%rdi), %r9
+    mrmovq 24(%rdi), %r10
+    mrmovq 32(%rdi), %r11
+    mrmovq 40(%rdi), %r12 
+    mrmovq 48(%rdi), %r13 
+    mrmovq 56(%rdi), %r14 
+    mrmovq 64(%rdi),%rbx  
+    mrmovq 72(%rdi),%rbp
+
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    rmmovq %r9, 16(%rsi)
+    rmmovq %r10, 24(%rsi)
+    rmmovq %r11, 32(%rsi)
+    rmmovq %r12, 40(%rsi)
+    rmmovq %r13, 48(%rsi)
+    rmmovq %r14, 56(%rsi)
+    rmmovq %rbx, 64(%rsi)
+    rmmovq %rbp, 72(%rsi)
+
+
+    andq %rcx,%rcx
+	jle notInc1
+	iaddq $1,%rax
+
+notInc1:
+    andq %r8,%r8
+	jle notInc2
+	iaddq $1,%rax
+
+notInc2:
+    andq %r9,%r9
+	jle notInc3
+	iaddq $1,%rax
+
+notInc3:
+    andq %r10,%r10
+	jle notInc4
+	iaddq $1,%rax
+
+notInc4:
+    andq %r11,%r11 # val <= 0?
+	jle notInc5
+	iaddq $1,%rax
+
+notInc5:
+    andq %r12,%r12 # val <= 0?
+	jle notInc6
+	iaddq $1,%rax
+
+notInc6:
+    andq %r13,%r13 # val <= 0?
+	jle notInc7
+	iaddq $1,%rax
+
+notInc7:
+    andq %r14,%r14 # val <= 0?
+	jle notInc8
+	iaddq $1,%rax
+
+notInc8:
+    andq %rbx,%rbx # val <= 0?
+	jle notInc9
+	iaddq $1,%rax
+
+notInc9:
+    andq %rbp,%rbp # val <= 0?
+	jle notInc10
+	iaddq $1,%rax
+notInc10:
+
+# read val from src...
+    mrmovq 88(%rdi), %rcx	
+    mrmovq 96(%rdi), %r8
+    mrmovq 104(%rdi), %r9
+    mrmovq 112(%rdi), %r10
+    mrmovq 120(%rdi), %r11
+    mrmovq 128(%rdi), %r12 
+    mrmovq 136(%rdi), %r13 
+    mrmovq 144(%rdi), %r14 
+    mrmovq 152(%rdi),%rbx  
+    mrmovq 80(%rdi),%rbp
+
+# ...and store it to dst
+    rmmovq %rcx, 88(%rsi)
+    rmmovq %r8, 96(%rsi)
+    rmmovq %r9, 104(%rsi)
+    rmmovq %r10, 112(%rsi)
+    rmmovq %r11, 120(%rsi)
+    rmmovq %r12, 128(%rsi)
+    rmmovq %r13, 136(%rsi)
+    rmmovq %r14, 144(%rsi)
+    rmmovq %rbx, 152(%rsi)
+    rmmovq %rbp, 80(%rsi)
+
+
+    andq %rcx,%rcx
+	jle notInc11
+	iaddq $1,%rax
+
+notInc11:
+    andq %r8,%r8
+	jle notInc12
+	iaddq $1,%rax
+
+notInc12:
+    andq %r9,%r9
+	jle notInc13
+	iaddq $1,%rax
+
+notInc13:
+    andq %r10,%r10
+	jle notInc14
+	iaddq $1,%rax
+
+notInc14:
+    andq %r11,%r11 # val <= 0?
+	jle notInc15
+	iaddq $1,%rax
+
+notInc15:
+    andq %r12,%r12 # val <= 0?
+	jle notInc16
+	iaddq $1,%rax
+
+notInc16:
+    andq %r13,%r13 # val <= 0?
+	jle notInc17
+	iaddq $1,%rax
+
+notInc17:
+    andq %r14,%r14 # val <= 0?
+	jle notInc18
+	iaddq $1,%rax
+
+notInc18:
+    andq %rbx,%rbx # val <= 0?
+	jle notInc19
+	iaddq $1,%rax
+
+notInc19:
+    andq %rbp,%rbp # val <= 0?
+	jle notInc20
+	iaddq $1,%rax
+notInc20:
+	iaddq $160, %rdi		# src+=6
+	iaddq $160, %rsi		# dst+=6
+	iaddq $-20, %rdx		# len-=6 # len >= 0?
+	jge Loop			# if so, goto Loop:
+
+end:
+    iaddq $20,%rdx
+    je Done
+endLoop:    
+    mrmovq (%rdi), %rcx	
+    rmmovq %rcx, (%rsi)
+    iaddq $8, %rdi		# src+=8
+	iaddq $8, %rsi		# dst+=8
+    andq %rcx,%rcx # val <= 0?
+	jle notIncx
+	iaddq $1,%rax
+notIncx:
+    iaddq $-1,%rdx
+    jne endLoop
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

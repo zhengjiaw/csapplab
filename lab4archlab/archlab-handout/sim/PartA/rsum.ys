@@ -1,0 +1,43 @@
+# Execution begins at address 0
+    .pos 0
+    irmovq stack,%rsp
+    call main
+    halt
+
+# Sample linked list
+.align 8
+ele1:
+    .quad 0x00a
+    .quad ele2
+ele2:
+    .quad 0x0b0
+    .quad ele3
+ele3:
+    .quad 0xc00
+    .quad 0
+
+main: 
+    irmovq ele1, %rdi
+    call rsum_list
+    ret
+
+rsum_list: 
+    pushq %r8   # 因为等下要用到这个，所以我们要记得恢复原样
+    xorq %rax,%rax
+
+loop:
+    andq %rdi,%rdi   
+    jne r       # 如果不是0 就继续递归
+    xorq %rax,%rax # 否则就返回0
+    jmp end
+r:  
+    mrmovq (%rdi),%r8
+    mrmovq 8(%rdi),%rdi  # 移动到下一位
+    call rsum_list
+    addq %r8,%rax
+end:
+    popq %r8
+    ret 
+
+.pos 0x200
+stack:

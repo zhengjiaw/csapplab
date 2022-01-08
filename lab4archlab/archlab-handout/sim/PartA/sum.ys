@@ -1,0 +1,41 @@
+# Execution begins at address 0
+    .pos 0
+    irmovq stack,%rsp
+    call main
+    halt
+
+# Sample linked list
+.align 8
+ele1:
+    .quad 0x00a
+    .quad ele2
+ele2:
+    .quad 0x0b0
+    .quad ele3
+ele3:
+    .quad 0xc00
+    .quad 0
+
+main: 
+    irmovq ele1, %rdi
+    call sum_list
+    ret
+
+sum_list: 
+    pushq %r8   # 因为等下要用到这个，所以我们要记得恢复原样
+    xorq %rax,%rax
+
+loop:
+    andq %rdi,%rdi   # if(list == 0) goto loopEnd
+    je loopEnd       # 
+    mrmovq (%rdi),%r8
+    addq %r8,%rax
+    mrmovq 8(%rdi),%rdi  # 移动到下一位， 这里注意虽然val是四个自己，但是为了八字节对齐 所以加8
+    jmp loop
+
+loopEnd:
+    popq %r8
+    ret 
+
+.pos 0x200
+stack:
