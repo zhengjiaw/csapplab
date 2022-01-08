@@ -106,7 +106,7 @@ cd sim/seq
 | 写回   | R[rB]← valE                                                  |      |
 | 更新PC | PC← valP                                                     |      |
 
-这部分仍然不放代码了，需要的话，你可以去[仓库](https://gitee.com/lin-xi-269/csapplab/lab4archlab/archlab-handout/sim)看
+这部分仍然不放代码了,需要可以点击[seq-full.hcl](https://gitee.com/lin-xi-269/csapplab/blob/master/lab4archlab/archlab-handout/sim/seq/seq-full.hcl)
 
 下面是测试方法
 
@@ -186,11 +186,11 @@ make && (cd ../y86-code; make testpsim) && (cd ../ptest; make SIM=../pipe/psim T
 
 因为为了速度我对代码做了很多优化，并且让它的顺序多次变化，这个代码的可读性有一定下降，但是思路就还是上面的思路，还是比较好读的。下面是最终版本代码
 
-[pipe-full.hcl](https://gitee.com/lin-xi-269/csapplab/raw/master/lab4archlab/archlab-handout/sim/pipe/pipe-full.hcl)
+[pipe-full.hcl](https://gitee.com/lin-xi-269/csapplab/tree/master/lab4archlab/archlab-handout/sim/pipe/pipe-full.hcl)
 
-[ncopy.ys](https://gitee.com/lin-xi-269/csapplab/raw/master/lab4archlab/archlab-handout/sim/pipe/ncopy.ys)
+[ncopy.ys](https://gitee.com/lin-xi-269/csapplab/tree/master/lab4archlab/archlab-handout/sim/pipe/ncopy.ys)
 
-另外[仓库](https://gitee.com/lin-xi-269/csapplab/lab4archlab/archlab-handout/sim)有多个版本的代码
+另外[仓库](https://gitee.com/lin-xi-269/csapplab/tree/master/lab4archlab/archlab-handout/sim)有多个版本的代码
 
 ![image-20220108142928044](https://gitee.com/wzjia/picturetwo/raw/master/image-20220108142928044.png)
 
