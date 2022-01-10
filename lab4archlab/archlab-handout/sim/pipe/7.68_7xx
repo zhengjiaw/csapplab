@@ -16,20 +16,18 @@ ncopy:
 ##################################################################
 # You can modify this portion
 	# Loop header
-	xorq %rax,%rax		# count = 0;
-    iaddq $-9,%rdx       #length - 6 
+    iaddq $-7,%rdx       #length - 6 
 	jl end		# limit < 0? if so, goto end:
 Loop:	
 # read val from src...
-    mrmovq (%rdi),   %rcx	
-    mrmovq 8(%rdi),  %r8
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
     mrmovq 16(%rdi), %r9
     mrmovq 24(%rdi), %r10
     mrmovq 32(%rdi), %r11
     mrmovq 40(%rdi), %r12 
     mrmovq 48(%rdi), %r13 
-    mrmovq 56(%rdi), %r14 
-    mrmovq 64(%rdi), %rbx  
+
 
 # ...and store it to dst
     rmmovq %rcx, (%rsi)
@@ -39,8 +37,6 @@ Loop:
     rmmovq %r11, 32(%rsi)
     rmmovq %r12, 40(%rsi)
     rmmovq %r13, 48(%rsi)
-    rmmovq %r14, 56(%rsi)
-    rmmovq %rbx, 64(%rsi)
 
 
     andq %rcx,%rcx
@@ -78,100 +74,128 @@ notInc6:
 	iaddq $1,%rax
 
 notInc7:
-    andq %r14,%r14 # val <= 0?
-	jle notInc8
-	iaddq $1,%rax
-
-notInc8:
-    andq %rbx,%rbx # val <= 0?
-	jle notInc9
-	iaddq $1,%rax
-
-notInc9:
-	iaddq $72, %rdi		# src+=6
-	iaddq $72, %rsi		# dst+=6
-	iaddq $-9, %rdx		# len-=6 # len >= 0?
+	iaddq $56, %rdi		# src+=6
+	iaddq $56, %rsi		# dst+=6
+	iaddq $-7, %rdx		# len-=6 # len >= 0?
 	jge Loop			# if so, goto Loop:
 
 end:
-    iaddq $9,%rdx
+    iaddq $7,%rdx
     je Done
 
-#1
-    mrmovq (%rdi), %rcx
-    rmmovq %rcx, (%rsi)
-    andq %rcx,%rcx # val <= 0?
-	jle notIncx9
-	iaddq $1,%rax
-notIncx9:
+    iaddq $-4,%rdx
+    jge end4 
+    
+    iaddq $3,%rdx
+    je end1
+
     iaddq $-1,%rdx
-    je Done
-#2
+    je end2
+
+end3:
+# read val from src...
+    mrmovq (%rdi), %rcx	
     mrmovq 8(%rdi), %r8
-    rmmovq %r8, 8(%rsi)
-    andq %r8,%r8
-	jle notIncx10
-	iaddq $1,%rax
-notIncx10:
+    mrmovq 16(%rdi), %r9
 
 # ...and store it to dst
-    iaddq $-1,%rdx
-    je Done
-
-#3
-    mrmovq 16(%rdi), %r9
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
     rmmovq %r9, 16(%rsi)
+
+    andq %rcx,%rcx
+	jle notInc12
+	iaddq $1,%rax
+
+notInc12:
+    andq %r8,%r8
+	jle notInc13
+	iaddq $1,%rax
+
+notInc13:
     andq %r9,%r9
-	jle notIncx11
+	jle notInc14
 	iaddq $1,%rax
-notIncx11:
-    iaddq $-1,%rdx
-    je Done
-#4
+notInc14:
+    ret
+
+end1:
+    mrmovq (%rdi), %rcx	
+    rmmovq %rcx, (%rsi)
+    andq %rcx,%rcx # val <= 0?
+	jle notInc9
+	iaddq $1,%rax
+notInc9:
+    ret 
+
+
+end2:
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+
+    andq %rcx,%rcx
+	jle notInc10
+	iaddq $1,%rax
+
+notInc10:
+    andq %r8,%r8
+	jle notInc11
+	iaddq $1,%rax
+notInc11:
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    ret 
+
+
+end4:
+# read val from src...
+    mrmovq (%rdi), %rcx	
+    mrmovq 8(%rdi), %r8
+    mrmovq 16(%rdi), %r9
     mrmovq 24(%rdi), %r10
+
+# ...and store it to dst
+    rmmovq %rcx, (%rsi)
+    rmmovq %r8, 8(%rsi)
+    rmmovq %r9, 16(%rsi)
     rmmovq %r10, 24(%rsi)
-    andq %r10,%r10
-	jle notIncx12
+
+    andq %rcx,%rcx
+	jle notInc15
 	iaddq $1,%rax
-notIncx12:
-#5
-    iaddq $-1,%rdx
+
+notInc15:
+    andq %r8,%r8
+	jle notInc16
+	iaddq $1,%rax
+
+notInc16:
+    andq %r9,%r9
+	jle notInc17
+	iaddq $1,%rax
+notInc17:
+    andq %r10,%r10
+	jle notInc18
+	iaddq $1,%rax
+notInc18:
+    andq %rdx,%rdx
     je Done
-    mrmovq 32(%rdi), %rcx	
+    mrmovq 32(%rdi), %rcx	# 如果是还剩了5个元素
     rmmovq %rcx, 32(%rsi)
     andq %rcx,%rcx
-    jle notIncx13
+    jle notInc19
     iaddq $1,%rax
-notIncx13:
-#6
+
+notInc19:
     iaddq $-1,%rdx
     je Done
-    mrmovq 40(%rdi), %rcx	
+    mrmovq 40(%rdi), %rcx	# 如果是还剩了5个元素
     rmmovq %rcx, 40(%rsi)
     andq %rcx,%rcx
-    jle notIncx14
+    jle Done
     iaddq $1,%rax
-notIncx14:
-#7
-    iaddq $-1,%rdx
-    je Done
-    mrmovq 48(%rdi), %rcx	
-    rmmovq %rcx, 48(%rsi)
-    andq %rcx,%rcx
-    jle notIncx15
-    iaddq $1,%rax
-notIncx15:
-#8
-    iaddq $-1,%rdx
-    je Done
-    mrmovq 56(%rdi), %rcx	
-    rmmovq %rcx, 56(%rsi)
-    andq %rcx,%rcx
-    jle notIncx16
-    iaddq $1,%rax
-notIncx16:
-
-
 
 ##################################################################
 # Do not modify the following section of code

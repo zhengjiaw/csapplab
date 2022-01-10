@@ -1,0 +1,197 @@
+diff --git a/pipe-full.hcl b/pipe-full.hcl
+
+@@ -24,7 +24,7 @@ quote 'int main(int argc, char *argv[]){return sim_main(argc,argv);}'
+ ####################################################################
+ #    Declarations.  Do not change/remove/delete any of these       #
+ ####################################################################
+-
++wordsig UNCOND 'C_YES' # 这个在isa.h中被定义为0， jmp的ifun也是0
+ ##### Symbolic representation of Y86-64 Instruction Codes #############
+ wordsig INOP 	'I_NOP'
+ wordsig IHALT	'I_HALT'
+@@ -132,15 +132,23 @@ wordsig W_valM  'mem_wb_curr->valm'	# Memory M value
+ ####################################################################
+ 
+ ################ Fetch Stage     ###################################
++wordsig IIADDQ	'I_IADDQ' # iaddq
+ 
+ ## What address should instruction be fetched at
++## 当前要去的指令是什么？
+ word f_pc = [
+-	# Mispredicted branch.  Fetch at incremented PC
+-	M_icode == IJXX && !M_Cnd : M_valA;
++    # M_valA是访存得到的这个指令的地址，M_valE由valP 得来
++    # M_Cnd 为1应该要跳转，为0表示不需要跳转
++	# 选择分支（valC也就是M_valE）之后，预测失败, 因此我们要 选择另外一边
++
++	M_icode == IJXX && M_ifun != UNCOND && M_valE < M_valA && !M_Cnd : M_valA;
++	# 当时未选择分支（valP），预测失败，因此我们要 选择另外一边
++	M_icode == IJXX && M_ifun != UNCOND && M_valE >= M_valA && M_Cnd : M_valE;
++
+ 	# Completion of RET instruction
+ 	W_icode == IRET : W_valM;
+ 	# Default: Use predicted value of PC
+-	1 : F_predPC;
++	1 : F_predPC; 
+ ];
+ 
+ ## Determine icode of fetched instruction
+@@ -158,7 +166,7 @@ word f_ifun = [
+ # Is instruction valid?
+ bool instr_valid = f_icode in 
+ 	{ INOP, IHALT, IRRMOVQ, IIRMOVQ, IRMMOVQ, IMRMOVQ,
+-	  IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ };
++	  IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IIADDQ };
+ 
+ # Determine status code for fetched instruction
+ word f_stat = [
+@@ -171,15 +179,18 @@ word f_stat = [
+ # Does fetched instruction require a regid byte?
+ bool need_regids =
+ 	f_icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, 
+-		     IIRMOVQ, IRMMOVQ, IMRMOVQ };
++		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ };
+ 
+ # Does fetched instruction require a constant word?
+ bool need_valC =
+-	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL };
++	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ };
+ 
+-# Predict next value of PC
++# Predict next value of PC 
++# JXX时我们选用小的值，这样往前跳就预测成功，往后跳就预测失败，这在循环很有用
+ word f_predPC = [
+-	f_icode in { IJXX, ICALL } : f_valC;
++    f_icode == IJXX && f_ifun != UNCOND && f_valC < f_valP : f_valC;
++	f_icode == IJXX && f_ifun != UNCOND && f_valC >= f_valP : f_valP;
++	f_icode == ICALL : f_valC;
+ 	1 : f_valP;
+ ];
+ 
+@@ -189,6 +200,7 @@ word f_predPC = [
+ ## What register should be used as the A source?
+ word d_srcA = [
+ 	D_icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ  } : D_rA;
++    D_icode == IIADDQ : D_rB;  
+ 	D_icode in { IPOPQ, IRET } : RRSP;
+ 	1 : RNONE; # Don't need register
+ ];
+@@ -202,7 +214,7 @@ word d_srcB = [
+ 
+ ## What register should be used as the E destination?
+ word d_dstE = [
+-	D_icode in { IRRMOVQ, IIRMOVQ, IOPQ} : D_rB;
++	D_icode in { IRRMOVQ, IIRMOVQ, IOPQ, IIADDQ} : D_rB;
+ 	D_icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
+ 	1 : RNONE;  # Don't write any register
+ ];
+@@ -239,9 +251,10 @@ word d_valB = [
+ ## Select input A to ALU
+ word aluA = [
+ 	E_icode in { IRRMOVQ, IOPQ } : E_valA;
+-	E_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : E_valC;
++	E_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ } : E_valC;
+ 	E_icode in { ICALL, IPUSHQ } : -8;
+ 	E_icode in { IRET, IPOPQ } : 8;
++    E_icode  == IJXX  : E_valC;  # 因为我们要让valC 传递到M
+ 	# Other instructions don't need ALU
+ ];
+ 
+@@ -250,6 +263,9 @@ word aluB = [
+ 	E_icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, 
+ 		     IPUSHQ, IRET, IPOPQ } : E_valB;
+ 	E_icode in { IRRMOVQ, IIRMOVQ } : 0;
++    E_icode ==  IJXX  : 0; # 给它加0
++    E_icode == IIADDQ : E_valA;
++
+ 	# Other instructions don't need ALU
+ ];
+ 
+@@ -260,13 +276,15 @@ word alufun = [
+ ];
+ 
+ ## Should the condition codes be updated?
+-bool set_cc = E_icode == IOPQ &&
++bool set_cc = (E_icode == IOPQ  || E_icode == IIADDQ ) && 
+ 	# State changes only during normal operation
+ 	!m_stat in { SADR, SINS, SHLT } && !W_stat in { SADR, SINS, SHLT };
+ 
+ ## Generate valA in execute stage
+-word e_valA = E_valA;    # Pass valA through stage
+-
++word e_valA = [
++    E_icode in { IRMMOVQ, IPUSHQ } && E_srcA == M_dstM : m_valM; #在要写dstM和要读的srcA寄存器相同时，就用访存得到的valM去运算
++    1 : E_valA;    # Pass valA through stage
++];
+ ## Set dstE to RNONE in event of not-taken conditional move
+ word e_dstE = [
+ 	E_icode == IRRMOVQ && !e_Cnd : RNONE;
+@@ -322,34 +340,56 @@ bool F_bubble = 0;
+ bool F_stall =
+ 	# Conditions for a load/use hazard
+ 	E_icode in { IMRMOVQ, IPOPQ } &&
+-	 E_dstM in { d_srcA, d_srcB } ||
+-	# Stalling at fetch while ret passes through pipeline
+-	IRET in { D_icode, E_icode, M_icode };
++    (   
++        E_dstM == d_srcB ||   # 要读的是srcB则和rmovq，pushq无关，所以直接stall
++        E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ }  # 如果译码阶段的命令是这两个就不用stall
++    ) # Stalling at fetch while ret passes through pipeline
++    || IRET in { D_icode, E_icode, M_icode };
+ 
+ # Should I stall or inject a bubble into Pipeline Register D?
+ # At most one of these can be true.
+ bool D_stall = 
+ 	# Conditions for a load/use hazard
+ 	E_icode in { IMRMOVQ, IPOPQ } &&
+-	 E_dstM in { d_srcA, d_srcB };
++    (   
++        E_dstM == d_srcB ||   # 要读的是srcB则和rmovq，pushq无关，所以直接stall
++        E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ }  # 如果译码阶段的命令是这两个就不用stall
++    );
+ 
+ bool D_bubble =
+-	# Mispredicted branch
+-	(E_icode == IJXX && !e_Cnd) ||
++	# 仍然分为 选了错误，和不选错误两种，错了就填泡泡即可
++	(
++	(E_icode == IJXX && E_ifun != UNCOND && E_valC < E_valA && !e_Cnd) ||
++	(E_icode == IJXX && E_ifun != UNCOND && E_valC >= E_valA && e_Cnd)
++	) ||
+ 	# Stalling at fetch while ret passes through pipeline
+ 	# but not condition for a load/use hazard
+-	!(E_icode in { IMRMOVQ, IPOPQ } && E_dstM in { d_srcA, d_srcB }) &&
+-	  IRET in { D_icode, E_icode, M_icode };
++	!(
++		E_icode in { IMRMOVQ, IPOPQ } &&
++		(
++		    E_dstM == d_srcB ||   # 要读的是srcB则和rmovq，pushq无关，所以直接stall
++            E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ }  # 如果译码阶段的命令是这两个就不用stall
++		)  # 加载冒险时，ret会被阻塞在译码阶段
++	) &&
++	  IRET in { D_icode, E_icode, M_icode }; #流水线必须暂停直到ret指令到达写回W阶段
+ 
+ # Should I stall or inject a bubble into Pipeline Register E?
+ # At most one of these can be true.
+ bool E_stall = 0;
+ bool E_bubble =
+-	# Mispredicted branch
+-	(E_icode == IJXX && !e_Cnd) ||
++	# 仍然分为 选了错误，和不选错误两种，错了就填泡泡即可
++	(
++	(E_icode == IJXX && E_ifun != UNCOND && E_valC < E_valA && !e_Cnd) ||
++	(E_icode == IJXX && E_ifun != UNCOND && E_valC >= E_valA && e_Cnd)
++	) ||
++    E_icode in { IMRMOVQ, IPOPQ } &&
++    (   
++        E_dstM == d_srcB ||
++        E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ } 
++    );
+ 	# Conditions for a load/use hazard
+-	E_icode in { IMRMOVQ, IPOPQ } &&
+-	 E_dstM in { d_srcA, d_srcB};
++	# E_icode in { IMRMOVQ, IPOPQ } &&
++	# E_dstM in { d_srcA, d_srcB};
+ 
+ # Should I stall or inject a bubble into Pipeline Register M?
+ # At most one of these can be true.

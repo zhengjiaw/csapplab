@@ -1,16 +1,3 @@
-#######################################################################
-# Test for copying block of size 4;
-#######################################################################
-	.pos 0
-main:	irmovq Stack, %rsp  	# Set up stack pointer
-
-	# Set up arguments for copy function and then invoke it
-	irmovq $4, %rdx		# src and dst have 4 elements
-	irmovq dest, %rsi	# dst array
-	irmovq src, %rdi	# src array
-	call ncopy		 
-	halt			# should halt with num nonzeros in %rax
-StartFun:
 #/* $begin ncopy-ys */
 ##################################################################
 # ncopy.ys - Copy a src block of len words to dst.
@@ -29,7 +16,7 @@ ncopy:
 ##################################################################
 # You can modify this portion
 	# Loop header
-    iaddq $-9,%rdx       #length - 6 
+    iaddq $-10,%rdx       #length - 6 
 	jl end		# limit < 0? if so, goto end:
 Loop:	
 # read val from src...
@@ -42,6 +29,7 @@ Loop:
     mrmovq 48(%rdi), %r13 
     mrmovq 56(%rdi), %r14 
     mrmovq 64(%rdi), %rbx  
+    mrmovq 72(%rdi), %rbp  
 
 # ...and store it to dst
     rmmovq %rcx, (%rsi)
@@ -53,7 +41,7 @@ Loop:
     rmmovq %r13, 48(%rsi)
     rmmovq %r14, 56(%rsi)
     rmmovq %rbx, 64(%rsi)
-
+    rmmovq %rbp, 72(%rsi)
 
     andq %rcx,%rcx
 	jle notInc1
@@ -98,15 +86,19 @@ notInc8:
     andq %rbx,%rbx # val <= 0?
 	jle notInc9
 	iaddq $1,%rax
-
 notInc9:
-	iaddq $72, %rdi		# src+=6
-	iaddq $72, %rsi		# dst+=6
-	iaddq $-9, %rdx		# len-=6 # len >= 0?
+    andq %rbp,%rbp # val <= 0?
+	jle notInc10x
+	iaddq $1,%rax
+notInc10x:
+
+	iaddq $80, %rdi		# src+=6
+	iaddq $80, %rsi		# dst+=6
+	iaddq $-10, %rdx		# len-=6 # len >= 0?
 	jge Loop			# if so, goto Loop:
 
 end:
-    iaddq $9,%rdx
+    iaddq $10,%rdx
     je Done
 
 #1
@@ -179,6 +171,15 @@ notIncx15:
     mrmovq 56(%rdi), %rcx	
     rmmovq %rcx, 56(%rsi)
     andq %rcx,%rcx
+    jle notIncx16
+    iaddq $1,%rax
+notIncx16:
+#9
+    iaddq $-1,%rdx
+    je Done
+    mrmovq 64(%rdi), %rcx	
+    rmmovq %rcx, 64(%rsi)
+    andq %rcx,%rcx
     jle Done
     iaddq $1,%rax
 
@@ -191,47 +192,3 @@ Done:
 # Keep the following label at the end of your function
 End:
 #/* $end ncopy-ys */
-EndFun:
-
-###############################
-# Source and destination blocks 
-###############################
-	.align 8
-src:
-	.quad -1
-	.quad -2
-	.quad 3
-	.quad 4
-	.quad 0xbcdefa # This shouldn't get moved
-
-	.align 16
-Predest:
-	.quad 0xbcdefa
-dest:
-	.quad 0xcdefab
-	.quad 0xcdefab
-	.quad 0xcdefab
-	.quad 0xcdefab
-Postdest:
-	.quad 0xdefabc
-
-.align 8
-# Run time stack
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-	.quad 0
-
-Stack:

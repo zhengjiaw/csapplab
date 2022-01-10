@@ -1,0 +1,77 @@
+--- a	2022-01-10 03:34:51.645727271 +0000
++++ seq-full.hcl	2022-01-10 03:33:28.402306872 +0000
+@@ -39,7 +39,7 @@
+ wordsig IPUSHQ	'I_PUSHQ'
+ wordsig IPOPQ	'I_POPQ'
+ # Instruction code for iaddq instruction
+-wordsig IIADDQ	'I_IADDQ'
++wordsig IIADDQ	'I_IADDQ' # iaddq
+ 
+ ##### Symbolic represenations of Y86-64 function codes                  #####
+ wordsig FNONE    'F_NONE'        # Default function code
+@@ -106,22 +106,24 @@
+ 
+ bool instr_valid = icode in 
+ 	{ INOP, IHALT, IRRMOVQ, IIRMOVQ, IRMMOVQ, IMRMOVQ,
+-	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ };
++	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IIADDQ };      ## add partB
+ 
+ # Does fetched instruction require a regid byte?
+ bool need_regids =
+ 	icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, 
+-		     IIRMOVQ, IRMMOVQ, IMRMOVQ };
++		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ };    ## add partB
+ 
+ # Does fetched instruction require a constant word?
++## add partB
+ bool need_valC =
+-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL };
++	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ }; ## add partB
+ 
+ ################ Decode Stage    ###################################
+ 
+ ## What register should be used as the A source?
+ word srcA = [
+ 	icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ  } : rA;
++    icode == IIADDQ : rB;  ## add partB
+ 	icode in { IPOPQ, IRET } : RRSP;
+ 	1 : RNONE; # Don't need register
+ ];
+@@ -136,7 +138,7 @@
+ ## What register should be used as the E destination?
+ word dstE = [
+ 	icode in { IRRMOVQ } && Cnd : rB;
+-	icode in { IIRMOVQ, IOPQ} : rB;
++	icode in { IIRMOVQ, IOPQ, IIADDQ } : rB; ## add partB
+ 	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
+ 	1 : RNONE;  # Don't write any register
+ ];
+@@ -152,7 +154,9 @@
+ ## Select input A to ALU
+ word aluA = [
+ 	icode in { IRRMOVQ, IOPQ } : valA;
+-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : valC;
++    ## add partB
++
++	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ } : valC;
+ 	icode in { ICALL, IPUSHQ } : -8;
+ 	icode in { IRET, IPOPQ } : 8;
+ 	# Other instructions don't need ALU
+@@ -163,6 +167,8 @@
+ 	icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, 
+ 		      IPUSHQ, IRET, IPOPQ } : valB;
+ 	icode in { IRRMOVQ, IIRMOVQ } : 0;
++    ## add partB
++    icode == IIADDQ : valA;      
+ 	# Other instructions don't need ALU
+ ];
+ 
+@@ -173,7 +179,7 @@
+ ];
+ 
+ ## Should the condition codes be updated?
+-bool set_cc = icode in { IOPQ };
++bool set_cc = icode in { IOPQ, IIADDQ};  ## add partB
+ 
+ ################ Memory Stage    ###################################
+ 

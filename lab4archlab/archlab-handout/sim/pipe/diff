@@ -1,0 +1,133 @@
+27c27
+< wordsig UNCOND 'C_YES' # 这个在isa.h中被定义为0， jmp的ifun也是0
+---
+> 
+135d134
+< wordsig IIADDQ	'I_IADDQ' # iaddq
+138d136
+< ## 当前要去的指令是什么？
+140,147c138,139
+<     # M_valA是访存得到的这个指令的地址，M_valE由valP 得来
+<     # M_Cnd 为1应该要跳转，为0表示不需要跳转
+< 	# 选择分支（valC也就是M_valE）之后，预测失败, 因此我们要 选择另外一边
+< 
+< 	M_icode == IJXX && M_ifun != UNCOND && M_valE < M_valA && !M_Cnd : M_valA;
+< 	# 当时未选择分支（valP），预测失败，因此我们要 选择另外一边
+< 	M_icode == IJXX && M_ifun != UNCOND && M_valE >= M_valA && M_Cnd : M_valE;
+< 
+---
+> 	# Mispredicted branch.  Fetch at incremented PC
+> 	M_icode == IJXX && !M_Cnd : M_valA;
+151c143
+< 	1 : F_predPC; 
+---
+> 	1 : F_predPC;
+169c161
+< 	  IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IIADDQ };
+---
+> 	  IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ };
+182c174
+< 		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ };
+---
+> 		     IIRMOVQ, IRMMOVQ, IMRMOVQ };
+186c178
+< 	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ };
+---
+> 	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL };
+188,189c180
+< # Predict next value of PC 
+< # JXX时我们选用小的值，这样往前跳就预测成功，往后跳就预测失败，这在循环很有用
+---
+> # Predict next value of PC
+191,193c182
+<     f_icode == IJXX && f_ifun != UNCOND && f_valC < f_valP : f_valC;
+< 	f_icode == IJXX && f_ifun != UNCOND && f_valC >= f_valP : f_valP;
+< 	f_icode == ICALL : f_valC;
+---
+> 	f_icode in { IJXX, ICALL } : f_valC;
+203d191
+<     D_icode == IIADDQ : D_rB;  
+217c205
+< 	D_icode in { IRRMOVQ, IIRMOVQ, IOPQ, IIADDQ} : D_rB;
+---
+> 	D_icode in { IRRMOVQ, IIRMOVQ, IOPQ} : D_rB;
+254c242
+< 	E_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ } : E_valC;
+---
+> 	E_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : E_valC;
+257d244
+<     E_icode  == IJXX  : E_valC;  # 因为我们要让valC 传递到M
+266,268d252
+<     E_icode ==  IJXX  : 0; # 给它加0
+<     E_icode == IIADDQ : E_valA;
+< 
+279c263
+< bool set_cc = (E_icode == IOPQ  || E_icode == IIADDQ ) && 
+---
+> bool set_cc = E_icode == IOPQ &&
+284,287c268,269
+< word e_valA = [
+<     E_icode in { IRMMOVQ, IPUSHQ } && E_srcA == M_dstM : m_valM; #在要写dstM和要读的srcA寄存器相同时，就用访存得到的valM去运算
+<     1 : E_valA;    # Pass valA through stage
+< ];
+---
+> word e_valA = E_valA;    # Pass valA through stage
+> 
+343,347c325,327
+<     (   
+<         E_dstM == d_srcB ||   # 要读的是srcB则和rmovq，pushq无关，所以直接stall
+<         E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ }  # 如果译码阶段的命令是这两个就不用stall
+<     ) # Stalling at fetch while ret passes through pipeline
+<     || IRET in { D_icode, E_icode, M_icode };
+---
+> 	 E_dstM in { d_srcA, d_srcB } ||
+> 	# Stalling at fetch while ret passes through pipeline
+> 	IRET in { D_icode, E_icode, M_icode };
+354,357c334
+<     (   
+<         E_dstM == d_srcB ||   # 要读的是srcB则和rmovq，pushq无关，所以直接stall
+<         E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ }  # 如果译码阶段的命令是这两个就不用stall
+<     );
+---
+> 	 E_dstM in { d_srcA, d_srcB };
+360,364c337,338
+< 	# 仍然分为 选了错误，和不选错误两种，错了就填泡泡即可
+< 	(
+< 	(E_icode == IJXX && E_ifun != UNCOND && E_valC < E_valA && !e_Cnd) ||
+< 	(E_icode == IJXX && E_ifun != UNCOND && E_valC >= E_valA && e_Cnd)
+< 	) ||
+---
+> 	# Mispredicted branch
+> 	(E_icode == IJXX && !e_Cnd) ||
+367,374c341,342
+< 	!(
+< 		E_icode in { IMRMOVQ, IPOPQ } &&
+< 		(
+< 		    E_dstM == d_srcB ||   # 要读的是srcB则和rmovq，pushq无关，所以直接stall
+<             E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ }  # 如果译码阶段的命令是这两个就不用stall
+< 		)  # 加载冒险时，ret会被阻塞在译码阶段
+< 	) &&
+< 	  IRET in { D_icode, E_icode, M_icode }; #流水线必须暂停直到ret指令到达写回W阶段
+---
+> 	!(E_icode in { IMRMOVQ, IPOPQ } && E_dstM in { d_srcA, d_srcB }) &&
+> 	  IRET in { D_icode, E_icode, M_icode };
+380,389c348,349
+< 	# 仍然分为 选了错误，和不选错误两种，错了就填泡泡即可
+< 	(
+< 	(E_icode == IJXX && E_ifun != UNCOND && E_valC < E_valA && !e_Cnd) ||
+< 	(E_icode == IJXX && E_ifun != UNCOND && E_valC >= E_valA && e_Cnd)
+< 	) ||
+<     E_icode in { IMRMOVQ, IPOPQ } &&
+<     (   
+<         E_dstM == d_srcB ||
+<         E_dstM == d_srcA && !D_icode in { IRMMOVQ, IPUSHQ } 
+<     );
+---
+> 	# Mispredicted branch
+> 	(E_icode == IJXX && !e_Cnd) ||
+391,392c351,352
+< 	# E_icode in { IMRMOVQ, IPOPQ } &&
+< 	# E_dstM in { d_srcA, d_srcB};
+---
+> 	E_icode in { IMRMOVQ, IPOPQ } &&
+> 	 E_dstM in { d_srcA, d_srcB};

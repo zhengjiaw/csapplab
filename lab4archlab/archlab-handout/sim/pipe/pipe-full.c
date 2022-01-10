@@ -171,7 +171,9 @@ long long gen_set_cc()
 
 long long gen_e_valA()
 {
-    return (id_ex_curr->vala);
+    return ((((id_ex_curr->icode) == (I_RMMOVQ) || (id_ex_curr->icode) == 
+          (I_PUSHQ)) & ((id_ex_curr->srca) == (ex_mem_curr->destm))) ? 
+      (mem_wb_next->valm) : (id_ex_curr->vala));
 }
 
 long long gen_e_dstE()
@@ -240,17 +242,20 @@ long long gen_F_bubble()
 long long gen_F_stall()
 {
     return ((((id_ex_curr->icode) == (I_MRMOVQ) || (id_ex_curr->icode) == 
-          (I_POPQ)) & ((id_ex_curr->destm) == (id_ex_next->srca) || 
-          (id_ex_curr->destm) == (id_ex_next->srcb))) | ((I_RET) == 
-        (if_id_curr->icode) || (I_RET) == (id_ex_curr->icode) || (I_RET)
-         == (ex_mem_curr->icode)));
+          (I_POPQ)) & (((id_ex_curr->destm) == (id_ex_next->srcb)) | ((
+              (id_ex_curr->destm) == (id_ex_next->srca)) & !(
+              (if_id_curr->icode) == (I_RMMOVQ) || (if_id_curr->icode) == 
+              (I_PUSHQ))))) | ((I_RET) == (if_id_curr->icode) || (I_RET)
+         == (id_ex_curr->icode) || (I_RET) == (ex_mem_curr->icode)));
 }
 
 long long gen_D_stall()
 {
     return (((id_ex_curr->icode) == (I_MRMOVQ) || (id_ex_curr->icode) == 
-        (I_POPQ)) & ((id_ex_curr->destm) == (id_ex_next->srca) || 
-        (id_ex_curr->destm) == (id_ex_next->srcb)));
+        (I_POPQ)) & (((id_ex_curr->destm) == (id_ex_next->srcb)) | ((
+            (id_ex_curr->destm) == (id_ex_next->srca)) & !(
+            (if_id_curr->icode) == (I_RMMOVQ) || (if_id_curr->icode) == 
+            (I_PUSHQ)))));
 }
 
 long long gen_D_bubble()
@@ -261,10 +266,12 @@ long long gen_D_bubble()
                & ((id_ex_curr->ifun) != (C_YES))) & ((id_ex_curr->valc) >= 
               (id_ex_curr->vala))) & (ex_mem_next->takebranch))) | (!((
             (id_ex_curr->icode) == (I_MRMOVQ) || (id_ex_curr->icode) == 
-            (I_POPQ)) & ((id_ex_curr->destm) == (id_ex_next->srca) || 
-            (id_ex_curr->destm) == (id_ex_next->srcb))) & ((I_RET) == 
-          (if_id_curr->icode) || (I_RET) == (id_ex_curr->icode) || (I_RET)
-           == (ex_mem_curr->icode))));
+            (I_POPQ)) & (((id_ex_curr->destm) == (id_ex_next->srcb)) | ((
+                (id_ex_curr->destm) == (id_ex_next->srca)) & !(
+                (if_id_curr->icode) == (I_RMMOVQ) || (if_id_curr->icode)
+                 == (I_PUSHQ))))) & ((I_RET) == (if_id_curr->icode) || 
+          (I_RET) == (id_ex_curr->icode) || (I_RET) == (ex_mem_curr->icode)
+          )));
 }
 
 long long gen_E_stall()
@@ -280,8 +287,10 @@ long long gen_E_bubble()
                & ((id_ex_curr->ifun) != (C_YES))) & ((id_ex_curr->valc) >= 
               (id_ex_curr->vala))) & (ex_mem_next->takebranch))) | ((
           (id_ex_curr->icode) == (I_MRMOVQ) || (id_ex_curr->icode) == 
-          (I_POPQ)) & ((id_ex_curr->destm) == (id_ex_next->srca) || 
-          (id_ex_curr->destm) == (id_ex_next->srcb))));
+          (I_POPQ)) & (((id_ex_curr->destm) == (id_ex_next->srcb)) | ((
+              (id_ex_curr->destm) == (id_ex_next->srca)) & !(
+              (if_id_curr->icode) == (I_RMMOVQ) || (if_id_curr->icode) == 
+              (I_PUSHQ))))));
 }
 
 long long gen_M_stall()
