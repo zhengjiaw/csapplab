@@ -277,7 +277,7 @@ void registerFunctions()
     registerTransFunction(transpose_submit, transpose_submit_desc);
 
     /* Register any additional transpose functions */
-    registerTransFunction(transpose_submit3, trans_desc);
+    // registerTransFunction(transpose_submit3, trans_desc);
 }
 
 /*
