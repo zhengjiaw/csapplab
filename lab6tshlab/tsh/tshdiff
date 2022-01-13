@@ -1,0 +1,210 @@
+15c15
+< [1] (926987) ./myspin 1 &
+---
+> [1] (926974) ./myspin 1 &
+20c20
+< [1] (927029) ./myspin 2 &
+---
+> [1] (927000) ./myspin 2 &
+22c22
+< [2] (927031) ./myspin 3 &
+---
+> [2] (927002) ./myspin 3 &
+24,25c24,25
+< [1] (927029) Running ./myspin 2 &
+< [2] (927031) Running ./myspin 3 &
+---
+> [1] (927000) Running ./myspin 2 &
+> [2] (927002) Running ./myspin 3 &
+30c30
+< Job [1] (927057) terminated by signal 2
+---
+> Job [1] (927048) terminated by signal 2
+35c35
+< [1] (927077) ./myspin 4 &
+---
+> [1] (927061) ./myspin 4 &
+37c37
+< Job [2] (927079) terminated by signal 2
+---
+> Job [2] (927063) terminated by signal 2
+39c39
+< [1] (927077) Running ./myspin 4 &
+---
+> [1] (927061) Running ./myspin 4 &
+44c44
+< [1] (927102) ./myspin 4 &
+---
+> [1] (927092) ./myspin 4 &
+46c46
+< Job [2] (927104) stopped by signal 20
+---
+> Job [2] (927094) stopped by signal 20
+48,49c48,49
+< [1] (927102) Running ./myspin 4 &
+< [2] (927104) Stopped ./myspin 5 
+---
+> [1] (927092) Running ./myspin 4 &
+> [2] (927094) Stopped ./myspin 5 
+54c54
+< [1] (927152) ./myspin 4 &
+---
+> [1] (927123) ./myspin 4 &
+56c56
+< Job [2] (927154) stopped by signal 20
+---
+> Job [2] (927125) stopped by signal 20
+58,59c58,59
+< [1] (927152) Running ./myspin 4 &
+< [2] (927154) Stopped ./myspin 5 
+---
+> [1] (927123) Running ./myspin 4 &
+> [2] (927125) Stopped ./myspin 5 
+61c61
+< [2] (927154) ./myspin 5 
+---
+> [2] (927125) ./myspin 5 
+63,64c63,64
+< [1] (927152) Running ./myspin 4 &
+< [2] (927154) Running ./myspin 5 
+---
+> [1] (927123) Running ./myspin 4 &
+> [2] (927125) Running ./myspin 5 
+69c69
+< [1] (927188) ./myspin 4 &
+---
+> [1] (927180) ./myspin 4 &
+71c71
+< Job [1] (927188) stopped by signal 20
+---
+> Job [1] (927180) stopped by signal 20
+73c73
+< [1] (927188) Stopped ./myspin 4 &
+---
+> [1] (927180) Stopped ./myspin 4 &
+80c80
+< Job [1] (927209) terminated by signal 2
+---
+> Job [1] (927198) terminated by signal 2
+98,100c98,100
+<  927206 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace11.txt -s ./tshref -a -p
+<  927207 pts/17   S+     0:00 ./tshref -p
+<  927227 pts/17   R      0:00 /bin/ps a
+---
+>  927195 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace11.txt -s ./tsh/tsh -a -p
+>  927196 pts/17   S+     0:00 ./tsh/tsh -p
+>  927205 pts/17   R      0:00 /bin/ps a
+105c105
+< Job [1] (927248) stopped by signal 20
+---
+> Job [1] (927231) stopped by signal 20
+107c107
+< [1] (927248) Stopped ./mysplit 4 
+---
+> [1] (927231) Stopped ./mysplit 4 
+125,129c125,129
+<  927245 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace12.txt -s ./tshref -a -p
+<  927246 pts/17   S+     0:00 ./tshref -p
+<  927248 pts/17   T      0:00 ./mysplit 4
+<  927249 pts/17   T      0:00 ./mysplit 4
+<  927257 pts/17   R      0:00 /bin/ps a
+---
+>  927228 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace12.txt -s ./tsh/tsh -a -p
+>  927229 pts/17   S+     0:00 ./tsh/tsh -p
+>  927231 pts/17   T      0:00 ./mysplit 4
+>  927232 pts/17   T      0:00 ./mysplit 4
+>  927244 pts/17   R      0:00 /bin/ps a
+134c134
+< Job [1] (927292) stopped by signal 20
+---
+> Job [1] (927261) stopped by signal 20
+136c136
+< [1] (927292) Stopped ./mysplit 4 
+---
+> [1] (927261) Stopped ./mysplit 4 
+154,158c154,158
+<  927289 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ./tshref -a -p
+<  927290 pts/17   S+     0:00 ./tshref -p
+<  927292 pts/17   T      0:00 ./mysplit 4
+<  927293 pts/17   T      0:00 ./mysplit 4
+<  927298 pts/17   R      0:00 /bin/ps a
+---
+>  927258 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ./tsh/tsh -a -p
+>  927259 pts/17   S+     0:00 ./tsh/tsh -p
+>  927261 pts/17   T      0:00 ./mysplit 4
+>  927262 pts/17   T      0:00 ./mysplit 4
+>  927280 pts/17   R      0:00 /bin/ps a
+177,179c177,179
+<  927289 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ./tshref -a -p
+<  927290 pts/17   S+     0:00 ./tshref -p
+<  927320 pts/17   R      0:00 /bin/ps a
+---
+>  927258 pts/17   S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ./tsh/tsh -a -p
+>  927259 pts/17   S+     0:00 ./tsh/tsh -p
+>  927288 pts/17   R      0:00 /bin/ps a
+186c186
+< [1] (927367) ./myspin 4 &
+---
+> [1] (927328) ./myspin 4 &
+202c202
+< Job [1] (927367) stopped by signal 20
+---
+> Job [1] (927328) stopped by signal 20
+206c206
+< [1] (927367) ./myspin 4 &
+---
+> [1] (927328) ./myspin 4 &
+208c208
+< [1] (927367) Running ./myspin 4 &
+---
+> [1] (927328) Running ./myspin 4 &
+215c215
+< Job [1] (927407) terminated by signal 2
+---
+> Job [1] (927387) terminated by signal 2
+217c217
+< [1] (927417) ./myspin 3 &
+---
+> [1] (927391) ./myspin 3 &
+219c219
+< [2] (927419) ./myspin 4 &
+---
+> [2] (927393) ./myspin 4 &
+221,222c221,222
+< [1] (927417) Running ./myspin 3 &
+< [2] (927419) Running ./myspin 4 &
+---
+> [1] (927391) Running ./myspin 3 &
+> [2] (927393) Running ./myspin 4 &
+224c224
+< Job [1] (927417) stopped by signal 20
+---
+> Job [1] (927391) stopped by signal 20
+226,227c226,227
+< [1] (927417) Stopped ./myspin 3 &
+< [2] (927419) Running ./myspin 4 &
+---
+> [1] (927391) Stopped ./myspin 3 &
+> [2] (927393) Running ./myspin 4 &
+231c231
+< [1] (927417) ./myspin 3 &
+---
+> [1] (927391) ./myspin 3 &
+233,234c233,234
+< [1] (927417) Running ./myspin 3 &
+< [2] (927419) Running ./myspin 4 &
+---
+> [1] (927391) Running ./myspin 3 &
+> [2] (927393) Running ./myspin 4 &
+242c242
+< Job [1] (927453) stopped by signal 20
+---
+> Job [1] (927437) stopped by signal 20
+244c244
+< [1] (927453) Stopped ./mystop 2
+---
+> [1] (927437) Stopped ./mystop 2
+246c246
+< Job [2] (927456) terminated by signal 2
+---
+> Job [2] (927447) terminated by signal 2
