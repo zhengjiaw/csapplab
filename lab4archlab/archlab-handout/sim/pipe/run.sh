@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash 
 make VERSION=full  ## all
 result=`./correctness.pl -p`
 if [[ $result == *"68/68"* ]]; then
