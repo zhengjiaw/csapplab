@@ -68,6 +68,7 @@ static inline size_t split(const char *cmdline, char **argv, char delimiter)
 size_t pipeCmdline(const char *cmdline, char **argv) { return split(cmdline, argv, '|'); }
 
 //从命令后的空格开始寻找'<' or '>' 重定向成功返回1 出错返回 0
+// 重定向函数
 size_t redirect(char **argv)
 {
     size_t argc = 1;

@@ -30,6 +30,7 @@ void waitfg(pid_t pgid)
     tcsetpgrp(0, shellId);  // 还原shell
     return;
 }
+
 static int restartjob(struct job_t *job, int state)
 {
     if (job == NULL) return -1;
@@ -40,41 +41,52 @@ static int restartjob(struct job_t *job, int state)
     job->state = state;
     return 1;
 }
-
+// 读出pid或者是 job number 对应的jobs中的jid
 static int bg_fg_read_pos(char **argv)
 {
     int pos;
-    if (argv[1] == NULL || argv[1][0] == '\0')
-        pos = -1;
-    else if (isdigit(argv[1][0]))
+    if (argv[1] == NULL || argv[1][0] == '\0')  // 没有输入数字
+        return -1;
+    else if (isdigit(argv[1][0])) {
         pos = (size_t)pid2jid(getInt(argv[1], 0, "bg_fg_read_pos"));
-    else if (argv[1][0] == '%')
+        if (pos == 0) return -2;  // No such process
+    } else if (argv[1][0] == '%') {
         pos = (size_t)getInt(argv[1] + 1, 0, "bg_fg_read_pos");
-    else
-        return 0;
-    if (pos >= MAXJOBS || pos == 0) return 0;
+        if (pos >= nextjid || pos == 0) return -3;  // No such job
+    } else
+        return -4;  // 不是数字
     return pos;
 }
-/*
- * do_bgfg - Execute the builtin bg and fg commands
- */
+
 // let process to background, successfully completed return 0 else -1
 int do_bg_fg(char **argv)
 {
-    int pos = bg_fg_read_pos(argv);
-    if (pos == 0) {
-        printf("error input\n");
+    int pos = bg_fg_read_pos(argv);  // 得到jid
+    if (pos == -1) {                 // 没有输入数字
+        printf("%s command requires PID or %%jobid argument\n", argv[0]);
         return -1;
     }
-    if (pos == -1) {
-        printf("tsh: %s %s: no such job\n", argv[0], "current");
+    if (pos == -2) {  // process超过范围
+        printf("(%s): No such process\n", argv[1]);
         return -1;
     }
-    int res, state = (!strcmp(argv[0], "bg") ? BG : FG);
-    struct job_t *job = getjobjid(jobs, pos);
-    res = restartjob(job, state);
+    if (pos == -3) {  // job超过范围
+        printf("%s: No such job\n", argv[1]);
+        return -1;
+    }
+    if (pos == -4) {  // 不是数字
+        printf("%s: argument must be a PID or %%jobid\n", argv[0]);
+        return -1;
+    }
+    int res, state = (!strcmp(argv[0], "bg") ? BG : FG);  // 确定前后台
+    struct job_t *job = getjobjid(jobs, pos);             // 得到相对应的job
+    res = restartjob(job, state);                         // 相当于唤醒这一个组
+    if (state == BG) {   // 后台可以直接返回了
+        printf("[%d] (%d) %s\n", job->jid, job->pgrp, job->cmdline);
+        return 0;
+    }
     if (res == -1) {
-        printf("tsh: %s %s: no such job\n", argv[0], !argv[1] ? "current" : argv[1]);
+        printf("%s: No such job\n", argv[1]);
         return -1;
     } else if (res == 0) {
         printf("tsh: %s: job %d already in %s\n", argv[0], job->jid,
