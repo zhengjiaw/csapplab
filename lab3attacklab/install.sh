@@ -8,5 +8,5 @@ cd  $labfile
 wget http://csapp.cs.cmu.edu/3e/README-"$lab"
 wget http://csapp.cs.cmu.edu/3e/"$lab".pdf
 wget "https://gitee.com/lin-xi-269/csapplab/raw/origin/lab3$lab/$lab""_【彩云小译】.pdf"
-wget https://csapp.cs.cmu.edu/3e/target1.tar
+wget http://csapp.cs.cmu.edu/3e/target1.tar
 tar -xvf *.tar
