@@ -90,11 +90,11 @@ make && gdb --args ./mdriver  -t ./traces/  -v
 
 实现完一个显示链表就有80多分了，在对其mm_realloc进行一个优化就和首次extend_heap的大小修改为1<<6就可以得到90分了。另外我的链表采用的best_fit,具体可以参考我的代码：[mm.c](https://gitee.com/lin-xi-269/csapplab/blob/master/lab7malloclab/src/mm.c)我这份代码中规中矩的，**个人感觉没有特别厉害的优化了，优点就是比较简洁，注释也比较全面。不必处理链表插入删除的特殊情况，缺点就是分不够高（内存利用率不够高），只有90分。**另外我还实现了分离存储的版本，分数只有88分了，但是速度提升了10倍:[my_naive.c](https://gitee.com/lin-xi-269/csapplab/blob/master/lab7malloclab/grade/handin/my_naive.c)
 
-事实上我的一系列分析过程都写在注释里了，如果你要参考的话，可以访问我的仓库查看。
+事实上我的一系列分析过程都写在注释里了，如果你要参考的话，可以访问我的[仓库](https://gitee.com/lin-xi-269/csapplab/tree/master/lab7malloclab/grade/handin)查看。
 
 ### 推荐
 
-如果你想看看<font color='cornflowerblue'>如何做针对数据做trick让分数更高</font>（98）可以看看李秋豪的博客
+如果你想看看<font color='cornflowerblue'>如何做针对数据做trick让分数更高</font>（98）可以看看[李秋豪](https://www.cnblogs.com/liqiuhao/p/8252373.html)的博客
 
 如果<font color='orange'>你想挑战自己</font>，并且全部都用指针实现，你可以尝试去看看[mm-tree.c](https://github.com/pgoodman/csc369/blob/master/malloclab/grade/handin/mm-tree.c)， 说实话他写的真的太厉害了，全部都是指针写的，实现了红黑树的高分（97）版本。(这个人貌似是cmu的学生，我的traces就是从他这里下载的)
 
@@ -128,7 +128,7 @@ make &&  ./mdriver  -t ./traces/  -v
 
 ### 仓库
 
-https://gitee.com/lin-xi-269/csapplab/tree/master/lab7malloclab
+[仓库](https://gitee.com/lin-xi-269/csapplab/tree/master/lab7malloclab)
 
 
 
