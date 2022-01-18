@@ -1,0 +1,63 @@
+--- ../tinyOrigin.c	2022-01-15 09:03:09.092007818 +0000
++++ tiny.c	2022-01-15 09:55:34.654945282 +0000
+@@ -45,6 +45,7 @@
+  * doit - handle one HTTP request/response transaction
+  */
+ /* $begin doit */
++unsigned char is_head = 0;
+ void doit(int fd)
+ {
+     int is_static;
+@@ -59,10 +60,17 @@
+         return;
+     printf("%s", buf);
+     sscanf(buf, "%s %s %s", method, uri, version);  // line:netp:doit:parserequest
+-    if (strcasecmp(method, "GET")) {                // line:netp:doit:beginrequesterr
+-        clienterror(fd, method, "501", "Not Implemented", "Tiny does not implement this method");
+-        return;
+-    }                        // line:netp:doit:endrequesterr
++    is_head = 0;
++    if (strcasecmp(method, "GET")) {  // line:netp:doit:beginrequesterr
++        if (!strcasecmp(method, "HEAD"))
++            is_head = 1;
++        else {
++            clienterror(fd, method, "501", "Not Implemented",
++                        "Tiny does not implement this method");
++            return;
++        }
++    }  // line:netp:doit:endrequesterr
++
+     read_requesthdrs(&rio);  // line:netp:doit:readrequesthdrs
+ 
+     /* Parse URI from GET request */
+@@ -155,13 +163,14 @@
+     Rio_writen(fd, buf, strlen(buf));
+     sprintf(buf, "Content-type: %s\r\n\r\n", filetype);
+     Rio_writen(fd, buf, strlen(buf));  // line:netp:servestatic:endserve
+-
++    if(is_head) return ;
+     /* Send response body to client */
+-    srcfd = Open(filename, O_RDONLY, 0);                         // line:netp:servestatic:open
+-    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);  // line:netp:servestatic:mmap
+-    Close(srcfd);                                                // line:netp:servestatic:close
+-    Rio_writen(fd, srcp, filesize);                              // line:netp:servestatic:write
+-    Munmap(srcp, filesize);                                      // line:netp:servestatic:munmap
++    srcfd = Open(filename, O_RDONLY, 0);  // line:netp:servestatic:open
++    srcp = (char *)Malloc(filesize);
++    Rio_readn(srcfd, srcp, filesize);
++    Rio_writen(fd, srcp, filesize);
++    Free(srcp);
++    Close(srcfd);  // line:netp:servestatic:close
+ }
+ 
+ /*
+@@ -200,7 +209,8 @@
+         /* Real server would set all CGI vars here */
+         setenv("QUERY_STRING", cgiargs, 1);                       // line:netp:servedynamic:setenv
+         Dup2(fd, STDOUT_FILENO); /* Redirect stdout to client */  // line:netp:servedynamic:dup2
+-        Execve(filename, emptylist, environ); /* Run CGI program */  // line:netp:servedynamic:execve
++        Execve(filename, emptylist, environ);
++        /* Run CGI program */  // line:netp:servedynamic:execve
+     }
+     Wait(NULL); /* Parent waits for and reaps child */  // line:netp:servedynamic:wait
+ }

@@ -1,0 +1,46 @@
+--- ../tinyOrigin.c	2022-01-15 09:03:09.092007818 +0000
++++ tiny.c	2022-01-15 09:03:33.262708841 +0000
+@@ -6,6 +6,8 @@
+  * Updated 11/2019 droh
+  *   - Fixed sprintf() aliasing issue in serve_static(), and clienterror().
+  */
++#include <signal.h>
++
+ #include "csapp.h"
+ 
+ void doit(int fd);
+@@ -182,12 +184,22 @@
+ }
+ /* $end serve_static */
+ 
++void sigchld_handler(int sig)
++{
++    int old_errno = errno;
++    pid_t pid;
++    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
++    }
++    errno = old_errno;
++}
++
+ /*
+  * serve_dynamic - run a CGI program on behalf of the client
+  */
+ /* $begin serve_dynamic */
+ void serve_dynamic(int fd, char *filename, char *cgiargs)
+ {
++    Signal(SIGCHLD, sigchld_handler);
+     char buf[MAXLINE], *emptylist[] = {NULL};
+ 
+     /* Return first part of HTTP response */
+@@ -200,9 +212,9 @@
+         /* Real server would set all CGI vars here */
+         setenv("QUERY_STRING", cgiargs, 1);                       // line:netp:servedynamic:setenv
+         Dup2(fd, STDOUT_FILENO); /* Redirect stdout to client */  // line:netp:servedynamic:dup2
+-        Execve(filename, emptylist, environ); /* Run CGI program */  // line:netp:servedynamic:execve
++        Execve(filename, emptylist, environ);
++        /* Run CGI program */  // line:netp:servedynamic:execve
+     }
+-    Wait(NULL); /* Parent waits for and reaps child */  // line:netp:servedynamic:wait
+ }
+ /* $end serve_dynamic */
+ 

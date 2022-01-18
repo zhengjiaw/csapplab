@@ -1,0 +1,30 @@
+--- ../tinyOrigin.c	2022-01-15 09:03:09.092007818 +0000
++++ tiny.c	2022-01-15 09:12:31.310464090 +0000
+@@ -157,11 +157,12 @@
+     Rio_writen(fd, buf, strlen(buf));  // line:netp:servestatic:endserve
+ 
+     /* Send response body to client */
+-    srcfd = Open(filename, O_RDONLY, 0);                         // line:netp:servestatic:open
+-    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);  // line:netp:servestatic:mmap
+-    Close(srcfd);                                                // line:netp:servestatic:close
+-    Rio_writen(fd, srcp, filesize);                              // line:netp:servestatic:write
+-    Munmap(srcp, filesize);                                      // line:netp:servestatic:munmap
++    srcfd = Open(filename, O_RDONLY, 0);  // line:netp:servestatic:open
++    srcp = (char*)Malloc(filesize);
++    Rio_readn(srcfd, srcp, filesize);
++    Rio_writen(fd, srcp, filesize);
++    Free(srcp);
++    Close(srcfd);  // line:netp:servestatic:close
+ }
+ 
+ /*
+@@ -200,7 +201,8 @@
+         /* Real server would set all CGI vars here */
+         setenv("QUERY_STRING", cgiargs, 1);                       // line:netp:servedynamic:setenv
+         Dup2(fd, STDOUT_FILENO); /* Redirect stdout to client */  // line:netp:servedynamic:dup2
+-        Execve(filename, emptylist, environ); /* Run CGI program */  // line:netp:servedynamic:execve
++        Execve(filename, emptylist, environ);
++        /* Run CGI program */  // line:netp:servedynamic:execve
+     }
+     Wait(NULL); /* Parent waits for and reaps child */  // line:netp:servedynamic:wait
+ }

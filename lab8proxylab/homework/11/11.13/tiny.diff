@@ -1,0 +1,18 @@
+--- ../tinyOrigin.c	2022-01-15 09:58:06.151774376 +0000
++++ tiny.c	2022-01-15 10:52:46.281601466 +0000
+@@ -18,6 +18,7 @@
+ 
+ int main(int argc, char **argv)
+ {
++    if (Signal(SIGPIPE, SIG_IGN) == SIG_ERR) unix_error("mask signal pipe error");
+     int listenfd, connfd;
+     char hostname[MAXLINE], port[MAXLINE];
+     socklen_t clientlen;
+@@ -197,6 +198,7 @@
+     Rio_writen(fd, buf, strlen(buf));
+ 
+     if (Fork() == 0) { /* Child */  // line:netp:servedynamic:fork
++        if (Signal(SIGPIPE, SIG_DFL) == SIG_ERR) unix_error("mask signal pipe error");
+         /* Real server would set all CGI vars here */
+         setenv("QUERY_STRING", cgiargs, 1);                       // line:netp:servedynamic:setenv
+         Dup2(fd, STDOUT_FILENO); /* Redirect stdout to client */  // line:netp:servedynamic:dup2

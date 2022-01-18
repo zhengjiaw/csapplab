@@ -1,0 +1,76 @@
+--- ../../tinyOrigin.c	2022-01-15 09:58:06.151774376 +0000
++++ tiny.c	2022-01-15 10:31:49.758700473 +0000
+@@ -9,13 +9,13 @@
+ #include "csapp.h"
+ 
+ void doit(int fd);
+-void read_requesthdrs(rio_t *rp);
++void read_requesthdrs(rio_t *rp, char *cgiargs);
+ int parse_uri(char *uri, char *filename, char *cgiargs);
+ void serve_static(int fd, char *filename, int filesize);
+ void get_filetype(char *filename, char *filetype);
+ void serve_dynamic(int fd, char *filename, char *cgiargs);
+ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
+-
++//gcc -o tiny tiny.c ../csapp.c  -lpthread && sudo ./tiny 80
+ int main(int argc, char **argv)
+ {
+     int listenfd, connfd;
+@@ -45,6 +45,8 @@
+  * doit - handle one HTTP request/response transaction
+  */
+ /* $begin doit */
++unsigned char is_POST = 0;
++
+ void doit(int fd)
+ {
+     int is_static;
+@@ -59,13 +61,22 @@
+         return;
+     printf("%s", buf);
+     sscanf(buf, "%s %s %s", method, uri, version);  // line:netp:doit:parserequest
+-    if (strcasecmp(method, "GET")) {                // line:netp:doit:beginrequesterr
+-        clienterror(fd, method, "501", "Not Implemented", "Tiny does not implement this method");
+-        return;
+-    }                        // line:netp:doit:endrequesterr
+-    read_requesthdrs(&rio);  // line:netp:doit:readrequesthdrs
++
++    is_POST = 0;
++    if (strcasecmp(method, "GET")) {  // line:netp:doit:beginrequesterr
++        if (!strcasecmp(method, "POST"))
++            is_POST = 1;
++        else {
++            clienterror(fd, method, "501", "Not Implemented",
++                        "Tiny does not implement this method");
++            return;
++        }
++    }                                 // line:netp:doit:endrequesterr
++    read_requesthdrs(&rio, cgiargs);  // line:netp:doit:readrequesthdrs
+ 
+     /* Parse URI from GET request */
++    if (is_POST) strcat(uri, "?"), strcat(uri, cgiargs);
++    printf("%sxxxxxxxxxxxxxxxx", uri);
+     is_static = parse_uri(uri, filename, cgiargs);  // line:netp:doit:staticcheck
+     if (stat(filename, &sbuf) < 0) {                // line:netp:doit:beginnotfound
+         clienterror(fd, filename, "404", "Not found", "Tiny couldn't find this file");
+@@ -92,7 +103,7 @@
+  * read_requesthdrs - read HTTP request headers
+  */
+ /* $begin read_requesthdrs */
+-void read_requesthdrs(rio_t *rp)
++void read_requesthdrs(rio_t *rp, char *cgiargs)
+ {
+     char buf[MAXLINE];
+ 
+@@ -102,6 +113,11 @@
+         Rio_readlineb(rp, buf, MAXLINE);
+         printf("%s", buf);
+     }
++    if (is_POST) {
++        Rio_readnb(rp, cgiargs,
++                   rp->rio_cnt);  // 因为 post会把参数放到最后，并且就是原原本本的参数，没有\r\n
++        printf("%s", cgiargs);
++    }
+     return;
+ }
+ /* $end read_requesthdrs */

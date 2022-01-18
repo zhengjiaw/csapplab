@@ -1,0 +1,272 @@
+size: 1
+Accepted connection from (localhost, 40086)
+size: 1
+Accepted connection from (localhost, 40088)
+size: 2
+Accepted connection from (localhost, 40090)
+size: 3
+Accepted connection from (localhost, 40092)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 3
+Accepted connection from (localhost, 40094)
+size: 4
+nthreads : 2
+Accepted connection from (localhost, 40096)
+nthreads : 4
+size: 2
+Accepted connection from (localhost, 40098)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 2
+Accepted connection from (localhost, 40100)
+size: 3
+Accepted connection from (localhost, 40102)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+nthreads : 2
+nthreads : 1
+size: 1
+Accepted connection from (localhost, 40104)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 1
+Accepted connection from (localhost, 40106)
+size: 2
+Accepted connection from (localhost, 40108)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 3
+Accepted connection from (localhost, 40110)
+size: 4
+nthreads : 2
+nthreads : 4
+Accepted connection from (localhost, 40112)
+nthreads : 8
+nthreads : 16
+nthreads : 8
+nthreads : 4
+nthreads : 2
+nthreads : 1
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 1
+Accepted connection from (localhost, 40114)
+size: 1
+Accepted connection from (localhost, 40116)
+size: 2
+Accepted connection from (localhost, 40118)
+GET / HTTP/1.1
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 3
+Accepted connection from (localhost, 40120)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 3
+Accepted connection from (localhost, 40122)
+size: 4
+nthreads : 2
+nthreads : 4
+Accepted connection from (localhost, 40124)
+nthreads : 8
+nthreads : 16
+nthreads : 8
+nthreads : 4
+nthreads : 2
+nthreads : 1
+size: 1
+Accepted connection from (localhost, 40126)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 1
+Accepted connection from (localhost, 40128)
+size: 2
+Accepted connection from (localhost, 40130)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 3
+Accepted connection from (localhost, 40132)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 3
+Accepted connection from (localhost, 40134)
+size: 4
+nthreads : 2
+Accepted connection from (localhost, 40136)
+size: 4
+nthreads : 4
+Accepted connection from (localhost, 40138)
+nthreads : 8
+nthreads : 16
+nthreads : 32
+nthreads : 64
+nthreads : 32
+nthreads : 16
+nthreads : 8
+nthreads : 4
+nthreads : 2
+nthreads : 1
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 1
+Accepted connection from (localhost, 40140)
+size: 1
+Accepted connection from (localhost, 40142)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+size: 2
+Accepted connection from (localhost, 40144)
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+
+GET / HTTP/1.1
+TE: deflate,gzip;q=0.3
+Connection: TE, close
+Host: localhost
+User-Agent: lwp-request/6.43 libwww-perl/6.43
+

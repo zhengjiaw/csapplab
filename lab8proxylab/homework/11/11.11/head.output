@@ -1,0 +1,8 @@
+vm@vm:~/work/csapplab/lab8proxylab/homework$ HEAD localhost
+200 OK
+Server: Tiny Web Server
+Content-Length: 120
+Content-Type: text/html
+Client-Date: Sat, 15 Jan 2022 09:55:41 GMT
+Client-Peer: 127.0.0.1:80
+Client-Response-Num: 1

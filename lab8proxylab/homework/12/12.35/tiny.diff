@@ -1,0 +1,36 @@
+--- tinyOrigin.c	2022-01-17 16:27:25.249460990 +0000
++++ tiny.c	2022-01-17 16:42:26.145498698 +0000
+@@ -16,8 +16,15 @@
+ void serve_dynamic(int fd, char *filename, char *cgiargs);
+ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
+ 
++void sigchld_handler(int sig)
++{
++    while (waitpid(-1, NULL, WNOHANG) > 0)  // 回收子进程
++        ;
++}
++
+ int main(int argc, char **argv)
+ {
++    Signal(SIGCHLD, sigchld_handler);
+     int listenfd, connfd;
+     char hostname[MAXLINE], port[MAXLINE];
+     socklen_t clientlen;
+@@ -33,9 +40,14 @@
+     while (1) {
+         clientlen = sizeof(clientaddr);
+         connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);  // line:netp:tiny:accept
+-        Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
+-        printf("Accepted connection from (%s, %s)\n", hostname, port);
+-        doit(connfd);   // line:netp:tiny:doit
++        if (Fork() == 0) {
++            Close(listenfd);  // 关掉不用的 描述符， 当然关不关其实影响不是很大，因为子进程结束了，这些自然也就释放了
++            Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
++            printf("Accepted connection from (%s, %s)\n", hostname, port);
++            doit(connfd);   // line:netp:tiny:doit
++            Close(connfd);  // line:netp:tiny:close
++            exit(0);
++        }
+         Close(connfd);  // line:netp:tiny:close
+     }
+ }
