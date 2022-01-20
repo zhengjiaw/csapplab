@@ -66,8 +66,9 @@ INTEGER CODING RULES:
   You may assume that your machine:
   1. Uses 2s complement, 32-bit representations of integers.
   2. Performs right shifts arithmetically.
-  3. Has unpredictable behavior when shifting an integer by more
-     than the word size.
+  3. Has unpredictable behavior when shifting if the shift amount
+     is less than 0 or greater than 31.
+
 
 EXAMPLES OF ACCEPTABLE CODING STYLE:
   /*
@@ -90,10 +91,11 @@ EXAMPLES OF ACCEPTABLE CODING STYLE:
 
 FLOATING POINT CODING RULES
 
-For the problems that require you to implent floating-point operations,
+For the problems that require you to implement floating-point operations,
 the coding rules are less strict.  You are allowed to use looping and
 conditional control.  You are allowed to use both ints and unsigneds.
-You can use arbitrary integer and unsigned constants.
+You can use arbitrary integer and unsigned constants. You can use any arithmetic,
+logical, or comparison operations on int or unsigned data.
 
 You are expressly forbidden to:
   1. Define or use any macros.
@@ -108,10 +110,11 @@ You are expressly forbidden to:
 NOTES:
   1. Use the dlc (data lab checker) compiler (described in the handout) to 
      check the legality of your solutions.
-  2. Each function has a maximum number of operators (! ~ & ^ | + << >>)
-     that you are allowed to use for your implementation of the function. 
-     The max operator count is checked by dlc. Note that '=' is not 
-     counted; you may use as many of these as you want without penalty.
+  2. Each function has a maximum number of operations (integer, logical,
+     or comparison) that you are allowed to use for your implementation
+     of the function.  The max operator count is checked by dlc.
+     Note that assignment ('=') is not counted; you may use as many of
+     these as you want without penalty.
   3. Use the btest test harness to check your functions for correctness.
   4. Use the BDD checker to formally verify your functions
   5. The maximum number of ops for each function is given in the
@@ -128,8 +131,9 @@ NOTES:
  *   2. Use the BDD checker to formally verify that your solutions produce 
  *      the correct answers.
  */
-#endif 
 
+#endif
+// 1
 /*
  * bitXor - x^y using only ~ and &
  *   Example: bitXor(4, 5) = 1
@@ -137,7 +141,6 @@ NOTES:
  *   Max ops: 14
  *   Rating: 1
  */
-
 //异或：不是同时为0情况和不是同时为1的情况进行位与 , &两端同时取反就是|
 int bitXor(int x, int y) { return ~(~x & ~y) & ~(x & y); }
 /*
@@ -146,17 +149,15 @@ int bitXor(int x, int y) { return ~(~x & ~y) & ~(x & y); }
  *   Max ops: 4
  *   Rating: 1
  */
-
-// 2 ^ 31
 #define INTMIN (0x80u << 24)  // 1个op
 int tmin(void) { return INTMIN; }
 // 2
 /*
  * isTmax - returns 1 if x is the maximum, two's complement number,
  *     and 0 otherwise
- *   Legalfff ops: ! ~ & ^ | +
+ *   Legal ops: ! ~ & ^ | +
  *   Max ops: 10
- *   Rating: 2
+ *   Rating: 1
  */
 // 两个ops
 #define equal(x, y) (!((x) ^ (y)))
@@ -170,9 +171,9 @@ int isTmax(int x)
     // 当然0的相反数 也是 0， 所以我们要排除 x为 -1（~-1 == 0） 的情况
     return equal(negate(x), x) & toBool(x);
 }
-
 /*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
+ *   where bits are numbered from 0 (least significant) to 31 (most significant)
  *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 12
@@ -185,7 +186,6 @@ int allOddBits(int x)
     mask = (mask << 16) + mask;
     return equal((x & mask), mask);
 }
-
 /*
  * negate - return -x
  *   Example: negate(1) = -1.
@@ -205,7 +205,6 @@ int negate(int x) { return ~x + 1; }
  *   Max ops: 15
  *   Rating: 3
  */
-
 // 这个less_positive 只是一个简单的 '<' 因为我们不需要考虑 符号不同
 #define less_positive(x, y) (toBool((((x) + negate(y)) & INTMIN)))  // 6个ops
 //我们可以看到“十”位必须是3， 并且只需要“个”位 小于A即可
@@ -219,7 +218,6 @@ int isAsciiDigit(int x) { return equal(x >> 4, 0x3) & less_positive(x & 0xf, 0xA
  *   Max ops: 16
  *   Rating: 3
  */
-
 // 先将x转为bool， 然后求其nagate，因为-(1)的补码 全1， -(0）的补码为全0
 // 我们转换出这两个特别的补码 就可以&了
 int conditional(int x, int y, int z)  // 8个ops
@@ -239,10 +237,11 @@ inline static int less(int x, int y)
 {
 #define flagx ((x & INTMIN))  // 这里没有写 >> 31 主要是想省一个ops
 #define flagy ((y & INTMIN))
-#define notE (flagx ^ flagy) // 如果符号不同就直接选符号为正的，否则less_positive
+#define notE (flagx ^ flagy)  // 如果符号不同就直接选符号为正的，否则less_positive
     return conditional(notE, flagx >> 31, less_positive(x, y));
 }
 int isLessOrEqual(int x, int y) { return less(x, y) | equal(x, y); }
+
 // 4
 /*
  * logicalNeg - implement the ! operator, using all of
@@ -252,7 +251,6 @@ int isLessOrEqual(int x, int y) { return less(x, y) | equal(x, y); }
  *   Max ops: 12
  *   Rating: 4
  */
-
 // 0 则return 1， 否则 return 0
 // 只有0和最小数的补码 为本身，其余数为其相反数
 // 且 最小数的符号位为1,0的符号位为0，并且最小数右移31 为 -1
@@ -295,7 +293,7 @@ int howManyBits(int x)
 }
 // float
 /*
- * float_twice - Return bit-level equivalent of expression 2*f for
+ * floatScale2 - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
  *   they are to be interpreted as the bit-level representation of
@@ -305,12 +303,10 @@ int howManyBits(int x)
  *   Max ops: 30
  *   Rating: 4
  */
-
 //拆分这个整数出s,exo,m即可按照定义计算
 //关于非规格数的比较详细的说明：https://www.jianshu.com/p/cb377fd1a295
-unsigned float_twice(unsigned uf)
-{
-    // 拆分出 s, exp. m
+unsigned floatScale2(unsigned uf)
+{  // 拆分出 s, exp. m
     unsigned s = uf & (1 << 31);
     unsigned exp = (uf & 0x7f800000) >> 23;
     unsigned frac = uf & (~0xff800000);
@@ -323,69 +319,8 @@ unsigned float_twice(unsigned uf)
 
     return s | (exp << 23) | frac;
 }
-
 /*
- * float_i2f - Return bit-level equivalent of expression (float) x
- *   Result is returned as unsigned int, but
- *   it is to be interpreted as the bit-level representation of a
- *   single-precision floating point values.
- *   Legal ops: Any integer/unsigned operations incl. ||, &&. also if, while
- *   Max ops: 30
- *   Rating: 4
- */
-// 实现 float(int x) , 并且以unsigned返回
-
-// 这题仍然从定义出发 ： V = (-1) ^s * M * 2 ^ E, E = e - Bias(127)
-// 所以我们可以先求 s，然后将其转换为 unsigned，
-// 再求 E， 然后 就可以 e = E + Bias 求出e
-// 再去掉最高位 ， 因为 M = frac + 1， 这里面的1 就包括了最高位
-// 最后呢 x中剩下的 E位实际上就是 M
-// 这个题比较难的地方在于舍入 我参考了他的写法：https://zhuanlan.zhihu.com/p/106109635
-unsigned float_i2f(int x)
-{
-    if (!x) return 0;        // 0就直接返回
-    unsigned ux = x, s = 0;  // 初始化为正数的情况
-    if (x & INTMIN) {        // 考虑x 是 负数
-        ux = negate(x);
-        s = INTMIN;
-    }
-    //统计有几位
-    unsigned E = 0;
-    for (unsigned i = ux; i; E++) i >>= 1;
-    E--;  // 因为最后一个i是0 代表是不满足的， 即多求了一位，所以减去
-
-    ux = ux & (~(1 << (E)));  //去掉最高位
-    unsigned e = E + 127;     //计算e的值
-    //对尾数进行移位
-
-    if (E <= 23) {
-        ux = ux << (23 - E);  //尾数位数小于等于23的，直接将其移到顶
-    } else {                  //尾数位数大于23的，要进行截断，需要考虑舍入问题
-        unsigned count = 0;   // 统计>24 位的1的个数 ， 便于舍入
-        while (E > 24) {      // 大于 24的都舍去
-            if (ux & 0x01) count++;
-            ux >>= 1;
-            E--;
-        }
-        unsigned mask = ux & 0x01;
-        ux = ux >> 1;
-        if (mask) {
-            if (count)  // 向最近的数舍入
-                ux++;
-            else if (ux & 0x01)  // 第23位是1，++之后可以得到偶数， 所以++
-                ux++;
-        }
-        if (ux >> 23) {  //进位造成多一位
-            e++;
-            ux &= 0x7FFFFF;  //(~(1<<23)); //去掉最高位
-        }
-    }
-
-    return s | (e << 23) | ux;
-}
-
-/*
- * float_f2i - Return bit-level equivalent of expression (int) f
+ * floatFloat2Int - Return bit-level equivalent of expression (int) f
  *   for floating point argument f.
  *   Argument is passed as unsigned int, but
  *   it is to be interpreted as the bit-level representation of a
@@ -396,11 +331,7 @@ unsigned float_i2f(int x)
  *   Max ops: 30
  *   Rating: 4
  */
-//实现 (int)(float uf) 并且以int 形式返回
-// 这题看上去就像上一题的逆运算， 仍然是从定义出发： V = (-1) ^s * M * 2 ^ E,
-// uf中有 ：s e frac ，
-// 再利用 E = e - Bias(127), M = 1 + frac之后运算即可返回答案
-int float_f2i(unsigned uf)
+int floatFloat2Int(unsigned uf)
 {
     // 分解
     unsigned s = uf & (1 << 31);
@@ -416,6 +347,31 @@ int float_f2i(unsigned uf)
     //因为M 本身的值应该是小数，但是在这里是一个23位的数， 相当于被左移了23位， 因此E要和23作差
     int V = (E > 23 ? M << (E - 23) : M >> (23 - E));
     if (s) V *= -1;  // 负数
-
     return V;
+}
+/*
+ * floatPower2 - Return bit-level equivalent of the expression 2.0^x
+ *   (2.0 raised to the power x) for any 32-bit integer x.
+ *
+ *   The unsigned value that is returned should have the identical bit
+ *   representation as the single-precision floating-point number 2.0^x.
+ *   If the result is too small to be represented as a denorm, return
+ *   0. If too large, return +INF.
+ *
+ *   Legal ops: Any integer/unsigned operations incl. ||, &&. Also if, while
+ *   Max ops: 30
+ *   Rating: 4
+ */
+// E = e - 127
+// V= 1*2^E
+// 指数范围是 -126 ~ 127 
+// 根据浮点数表示，x就是指数表示
+unsigned floatPower2(int x)
+{
+    if (x >= 128) return 0x7f800000;  // 超过128越界了
+    if (x >= -126) return (x + 127) << 23; // -126在界内，直接放进e
+    if (x >= -150)          //我们还有23位小数，也可以来表示一下
+        return 1 << (x + 150);
+    else
+        return 0;
 }
