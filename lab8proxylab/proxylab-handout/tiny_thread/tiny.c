@@ -7,7 +7,7 @@
  *   - Fixed sprintf() aliasing issue in serve_static(), and clienterror().
  */
 #include "csapp.h"
-
+#include "thread_run.h"
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
 int parse_uri(char *uri, char *filename, char *cgiargs);
@@ -18,7 +18,7 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longms
 
 int main(int argc, char **argv)
 {
-    setbuf(stdout, NULL);
+    if (Signal(SIGPIPE, SIG_IGN) == SIG_ERR) unix_error("mask signal pipe error");
     int listenfd, connfd;
     char hostname[MAXLINE], port[MAXLINE];
     socklen_t clientlen;
@@ -29,15 +29,19 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: %s <port>\n", argv[0]);
         exit(1);
     }
+    pthread_t tid;
+    init();
+    Pthread_create(&tid, NULL, adjust_threads, NULL);
 
     listenfd = Open_listenfd(argv[1]);
+    setbuf(stdout, NULL);
     while (1) {
         clientlen = sizeof(clientaddr);
         connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);  // line:netp:tiny:accept
+        sbuf_insert(&sbuf, connfd);                                /* Insert connfd in buffer */
+        printf("size: %d\n", sbuf.size);
         Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
-        doit(connfd);   // line:netp:tiny:doit
-        Close(connfd);  // line:netp:tiny:close
     }
 }
 /* $end tinymain */
@@ -201,7 +205,8 @@ void serve_dynamic(int fd, char *filename, char *cgiargs)
         /* Real server would set all CGI vars here */
         setenv("QUERY_STRING", cgiargs, 1);                       // line:netp:servedynamic:setenv
         Dup2(fd, STDOUT_FILENO); /* Redirect stdout to client */  // line:netp:servedynamic:dup2
-        Execve(filename, emptylist, environ); /* Run CGI program */  // line:netp:servedynamic:execve
+        Execve(filename, emptylist, environ);
+        /* Run CGI program */  // line:netp:servedynamic:execve
     }
     Wait(NULL); /* Parent waits for and reaps child */  // line:netp:servedynamic:wait
 }

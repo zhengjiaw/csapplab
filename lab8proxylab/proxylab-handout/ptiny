@@ -1,0 +1,16 @@
+Accepted connection from (localhost, 33732)
+doit
+GET http://localhost:5247/nop-file.txt HTTP/1.1
+Host: localhost:5247
+User-Agent: curl/7.68.0
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+Accepted connection from (localhost, 33736)
+doit
+GET http://localhost:26311/home.html HTTP/1.1
+Host: localhost:26311
+User-Agent: curl/7.68.0
+Accept: */*
+Proxy-Connection: Keep-Alive
+

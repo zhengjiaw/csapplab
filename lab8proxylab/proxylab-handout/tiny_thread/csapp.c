@@ -818,12 +818,7 @@ ssize_t Rio_readn(int fd, void *ptr, size_t nbytes)
 {
     ssize_t n;
 
-    if ((n = rio_readn(fd, ptr, nbytes)) < 0) {
-        if (errno != ECONNRESET)
-            unix_error("Rio_readn error");
-        else
-            fprintf(stderr, "error:Connection reset by peer\n");
-    }
+    if ((n = rio_readn(fd, ptr, nbytes)) < 0) unix_error("Rio_readn error");
     return n;
 }
 
@@ -851,12 +846,7 @@ ssize_t Rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen)
 {
     ssize_t rc;
 
-    if ((rc = rio_readlineb(rp, usrbuf, maxlen)) < 0) {
-        if (errno != ECONNRESET)
-            unix_error("Rio_readlineb error");
-        else
-            fprintf(stderr, "error:Connection reset by peer\n");
-    }
+    if ((rc = rio_readlineb(rp, usrbuf, maxlen)) < 0) unix_error("Rio_readlineb error");
     return rc;
 }
 
