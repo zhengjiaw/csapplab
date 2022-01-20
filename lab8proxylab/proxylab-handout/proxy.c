@@ -43,34 +43,42 @@ int main(int argc, char **argv)
         printf("Accepted connection from (%s, %s)\n", hostname, port);
     }
 }
-
+// 整体思路也就是：
+// 1. 读请求
+// 2. 改变请求的一些请求头
+// 3. 去cache中查找是否有这个请求
+// 4. 有则返回
+// 5. 转发请求
+// 6. 写回给客户，并且将结果写到value中
 void doit(int fd)
 {
     struct stat sbuf;
     struct Request req;
     printf("doit\n");
-    if (read_request(fd, &req) == -1) return;
+    if (read_request(fd, &req) == -1) return;  // 1读
     /* Parse URI from GET request */
-    change_request(&req);
+    change_request(&req);  // 2改变
     struct Key key;
     strcpy(key.host, req.req_l.host);
     key.port = req.req_l.port;
     strcpy(key.path, req.req_l.path);
-
-    char *value = read_cache(&cache_s, &key);
+    printf("read_cache\n");
+    char *value = read_cache(&cache_s, &key);  // 3查找
 
     if (value != NULL) {
-        Rio_writen(fd, value, strlen(value));
+        Rio_writen(fd, value, strlen(value));  // 4有则写回
         return;
     }
+    printf("transmit\n");
 
     // 转发请求
     char res[MAX_CACHE_SIZE];
-    int connfd = transmit(&req);
+    int connfd = transmit(&req);  // 5转发
     if (connfd == -1) {
         fprintf(stderr, "error :proxy fd could not be found");
         return;
     }
-    output(connfd, fd, res);
-    write_cache(&cache_s, &key, res);
+    printf("output\n");
+    output(connfd, fd, res);           //6写回
+    write_cache(&cache_s, &key, res);  //写cache
 }

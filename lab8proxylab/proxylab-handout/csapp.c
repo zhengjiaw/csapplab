@@ -842,8 +842,12 @@ void Rio_readinitb(rio_t *rp, int fd) { rio_readinitb(rp, fd); }
 ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 {
     ssize_t rc;
-
-    if ((rc = rio_readnb(rp, usrbuf, n)) < 0) unix_error("Rio_readnb error");
+    if ((rc = rio_readnb(rp, usrbuf, n)) < 0) {
+        if (errno != ECONNRESET)
+            unix_error("Rio_readnb error");
+        else
+            fprintf(stderr, "error:Connection reset by peer\n");
+    }
     return rc;
 }
 

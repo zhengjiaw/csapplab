@@ -11,17 +11,18 @@
 #define HEADERS_MAX_LEN 128
 #define VERSION_MAX_LEN 128
 #define GET 0
+#define Header_MAX_LINE 128
+#define HeaderV_MAX_LINE 1024
 static const char *user_agent_hdr =
     "Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r";
 struct Reqest_Line {
     char method[METHOD_MAX_LEN];  // 请求方法类型，目前我们只处理GET 0代表GET
-    char host[HOST_MAX_LEN];
+    char host[HOST_MAX_LEN];   
     int port;
     char path[PATH_MAX_LINE];
     char version[VERSION_MAX_LEN];
 };
-#define Header_MAX_LINE 128
-#define HeaderV_MAX_LINE 1024
+
 
 struct Request_Header {
     char name[Header_MAX_LINE];
@@ -30,8 +31,8 @@ struct Request_Header {
 
 struct Request {
     struct Reqest_Line req_l;
-    struct Request_Header headers[HEADERS_MAX_LEN]; 
-    int headers_len;
+    struct Request_Header headers[HEADERS_MAX_LEN];  // 请求头
+    int headers_len;   // 这个和请求头合成一个会更好，或者用链表实现
     char *message_body; // 可能会有正文部分
 };
 
@@ -44,13 +45,4 @@ void init_request(struct Request * req);
 int parse_uri(char* uri, struct Reqest_Line* req_l);
 int transmit(struct Request* req);
 void output(int fd, int clientfd,char *res);
-
-// GET http :  // www.cmu.edu/hub/index.html HTTP/1.1
-//             GET /
-//             hub / index.html HTTP / 1.0 host : www.cmu.edu Host、 User -
-//     Agent、 Connection 和 proxy - Connection User -
-//     Agent : user_agent_hdr Connection : close Proxy -
-//                                         Connection : close HTTP
-//     :  // www.cmu.edu:  8080/hub/index.  html
-
 #endif

@@ -8,7 +8,7 @@
 void sbuf_init(sbuf_t *sp, int n)
 {
     sp->size = 0;
-    sp->buf = Calloc(n, sizeof(int));
+    sp->buf = Calloc(n, sizeof(int));   
     sp->n = n;                  /* Buffer holds max of n items */
     sp->front = sp->rear = 0;   /* Empty buffer iff front == rear */
     Sem_init(&sp->mutex, 0, 1); /* Binary semaphore for locking */
@@ -16,7 +16,6 @@ void sbuf_init(sbuf_t *sp, int n)
     Sem_init(&sp->items, 0, 0); /* Initially, buf has zero data items */
 }
 /* $end sbuf_init */
-
 /* Clean up buffer sp */
 /* $begin sbuf_deinit */
 void sbuf_deinit(sbuf_t *sp) { Free(sp->buf); }

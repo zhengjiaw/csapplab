@@ -5,7 +5,10 @@ sem_t mutex, w;
 unsigned int read_cnt;
 unsigned volatile int readCnt;
 unsigned volatile char prev_is_write;  // 多加一个这个函数的判断
-
+// 这是一个经过改良的读者-写者模型
+// 主要是防止 有多个写者等待，会一直调用写者
+// 添加了prev_is_write,只要上次访问了写者，就会限制写者访问了。（不过这浪费了一些cpu时间）
+// 可以有效地避免上述情况，能确保读者能访问
 void *init_wr()
 {
     Sem_init(&mutex, 0, 1);

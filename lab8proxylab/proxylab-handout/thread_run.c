@@ -61,12 +61,11 @@ void *adjust_threads(void *vargp)
              * keep [0, hn] running
              * kill [hn, nthreads] threads
              */
-            int i;
-            for (i = hn; i < nthreads; i++) {
+            for (int i = hn; i < nthreads; i++) {
                 Pthread_cancel(threads[i].tid);
             }
             nthreads = hn;
         }
-        if (prev != nthreads) printf("nthreads : %d\n", nthreads);
+        // if (prev != nthreads) printf("nthreads : %d\n", nthreads);
     }
 }

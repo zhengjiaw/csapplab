@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 {
     init();
     read_cnt = 2;
-    unsigned int write_cnt = 10; // 即便是开到 100 我们的读者还是正常的读的
+    unsigned int write_cnt = 10;  // 即便是开到 100 我们的读者还是正常的读的
     setbuf(stdout, NULL);
     if (argc >= 2) read_cnt = atoi(argv[1]);
     if (argc >= 3) write_cnt = atoi(argv[2]);
@@ -38,26 +38,41 @@ int main(int argc, char **argv)
 void reader(void)
 {
     while (1) {
-        P(&mutex);
-        ++readCnt;
-        if (readCnt == 1) P(&w);  // 第一个读者,需要测试
-        V(&mutex);
-
-        P(&mutex);
+        lock_reader();
         printf("%d ___ %lu\n", book, Pthread_self());
-        if (--readCnt == 0) V(&w);  // 最后一个读者，需要增加
-        prev_is_write = 0;
-        V(&mutex);
+        unlock_reader();
     }
+}
+inline void lock_reader(void)
+{
+    P(&mutex);
+    ++readCnt;
+    if (readCnt == 1) P(&w);  // 第一个读者,需要测试
+    V(&mutex);
+    P(&mutex);
+}
+inline void unlock_reader(void)
+{
+    if (--readCnt == 0) V(&w);  // 最后一个读者，需要增加
+    prev_is_write = 0;
+    V(&mutex);
+}
+inline void lock_writer(void)
+{
+    while (prev_is_write && readCnt)
+        ;
+    P(&w);
+}
+inline void unlock_writer(void)
+{
+    prev_is_write = 1;
+    V(&w);
 }
 void writer(void)
 {
     while (1) {
-        while (prev_is_write && readCnt)
-            ;
-        P(&w);
+        lock_writer();
         book = time(0);
-        prev_is_write = 1;
-        V(&w);
+        unlock_write();
     }
 }
