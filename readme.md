@@ -1,6 +1,6 @@
 CSAPP目前来看一共分为8个lab官网为[CS:APP3e, Bryant and O'Hallaron (cmu.edu)](http://csapp.cs.cmu.edu/3e/students.html)
 
-这个项目是我学习CSAPP的时候做的全部lab，平均分在，整体代码基本上是关键部分都有详细注释的，并且都会readme.md的说明及思路。我这些实现的代码都比较简洁，并且在shell和proxy扩展了lab，使得那两份代码能支持更多一些的实用性功能。
+这个项目是我学习CSAPP的时候做的全部lab，平均分为98分，整体代码基本上是关键部分都有详细注释的，并且都会readme.md的说明及思路。我这些实现的代码都比较简洁，并且在shell和proxy扩展了lab，使得那两份代码能支持更多一些的实用性功能。
 
 如果你是Ubuntu系列的话，我已经写好了脚本，运行下面的命令，即可安装CSAPP的所有lab，以及相关的环境，和中文版的文档翻译。
 
